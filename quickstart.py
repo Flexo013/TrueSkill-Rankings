@@ -141,9 +141,20 @@ def process_matches():
             write_value(processed_cell, ["TRUE"])
 
 
+def calculate_leaderboard():
+    rating_data = read_value("Ratings!A2:C")
+
+    name_list = []
+    rating_dict = {}
+    for n, m, s in rating_data:
+        rating_dict[n] = tk.Rating(float(m), float(s))
+        name_list.append(n)
+
+
 def main():
     init_players()
     process_matches()
+    calculate_leaderboard()
     exit()
 
     """Shows basic usage of the Sheets API.

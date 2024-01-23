@@ -90,11 +90,9 @@ def update_rating(row_number, mu, sigma):
 def process_match(match_data):
     rating_data = read_value("Ratings!A2:C")
 
-    name_list = []
     rating_dict = {}
     for n, m, s in rating_data:
         rating_dict[n] = [float(m), float(s)]
-        name_list.append(n)
 
     [p1, p2, p3, p4, score_red, score_blue] = match_data
     score_red = int(score_red)
@@ -122,7 +120,8 @@ def process_match(match_data):
     new_ratings = rating_logic.run_dynamic_match(old_ratings)
 
     for i, p in enumerate(filter(lambda name: name, result)):
-        update_rating(name_list.index(p) + 2, new_ratings[i].mu, new_ratings[i].sigma)
+        update_rating(list(rating_dict.keys()).index(p) + 2,
+                      new_ratings[i].mu, new_ratings[i].sigma)
 
 
 def process_matches():

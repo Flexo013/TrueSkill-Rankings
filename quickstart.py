@@ -1,4 +1,5 @@
 import os.path
+from collections import Counter
 
 import trueskill as tk
 from google.auth.transport.requests import Request
@@ -104,6 +105,11 @@ def process_match(match_data):
         result = (p3, p4, p1, p2)
     else:
         # We don't support draws
+        return
+
+    max_occurrences = max(Counter(result).values())
+    if max_occurrences > 1:
+        # Bogus input where a player occurs multiple times
         return
 
     old_ratings = []

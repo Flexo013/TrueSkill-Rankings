@@ -149,6 +149,14 @@ def calculate_leaderboard():
         rating_dict[n] = tk.Rating(float(m), float(s))
         name_list.append(n)
 
+    leaderboard = sorted(list(rating_dict.values()), reverse=True)
+    leader_ranks = []
+    for s in leaderboard:
+        leader_ranks.append(list(rating_dict.keys())[list(rating_dict.values()).index(s)])
+
+    leader_ranks_values = [[i + 1, name] for i, name in enumerate(leader_ranks)]
+    write_value("Leaderboard!A2:B", leader_ranks_values)
+
 
 def main():
     init_players()

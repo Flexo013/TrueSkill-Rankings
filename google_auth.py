@@ -6,7 +6,7 @@ from googleapiclient.errors import HttpError
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-import quickstart
+import foosball_manager
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets", 'https://www.googleapis.com/auth/gmail.readonly']
@@ -42,7 +42,7 @@ def store_creds():
         sheet = service.spreadsheets()
         result = (
             sheet.values()
-            .get(spreadsheetId=quickstart.MAIN_SPREADSHEET_ID, range="Players!A1:B2")
+            .get(spreadsheetId=foosball_manager.MAIN_SPREADSHEET_ID, range="Players!A1:B2")
             .execute()
         )
         values = result.get("values", [])

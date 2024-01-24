@@ -8,7 +8,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 import google_auth
-import quickstart
+import foosball_manager
 
 # Path to the file where the OAuth2 token will be stored
 TOKEN_PATH = "token.json"
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         print("Found {0} emails labelled Foosball.".format(emails_found))
         if emails_found > old_email_count:
             print("Executing processing script!")
-            quickstart.main()
+            foosball_manager.main()
             old_email_count = emails_found
 
         # Sleep for 30 seconds before checking again

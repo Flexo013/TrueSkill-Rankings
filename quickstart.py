@@ -44,7 +44,7 @@ def write_value(sheet_range, value_array):
 
     service = build("sheets", "v4", credentials=creds)
 
-    body = {"values": [value_array]}
+    body = {"values": value_array}
 
     # Call the Sheets API
     result = (
@@ -76,25 +76,23 @@ def init_players():
         if not processed:
             new_rating = tk.Rating()
             rating_cells = "Ratings!" + row_label + "C2:" + row_label + "C3"
-            write_value(rating_cells, [new_rating.mu, new_rating.sigma])
-            write_value(processed_cell, ["TRUE"])
+            write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
+            write_value(processed_cell, [["TRUE"]])
 
 
 def update_rating(row_number, mu, sigma):
     write_value(
         "Ratings!R{0}C2:R{0}C3".format(row_number),
-        [mu, sigma]
+        [[mu, sigma]]
     )
 
 
 def process_match(match_data):
     rating_data = read_value("Ratings!A2:C")
 
-    name_list = []
     rating_dict = {}
     for n, m, s in rating_data:
         rating_dict[n] = [float(m), float(s)]
-        name_list.append(n)
 
     [p1, p2, p3, p4, score_red, score_blue] = match_data
     score_red = int(score_red)
@@ -122,7 +120,8 @@ def process_match(match_data):
     new_ratings = rating_logic.run_dynamic_match(old_ratings)
 
     for i, p in enumerate(filter(lambda name: name, result)):
-        update_rating(name_list.index(p) + 2, new_ratings[i].mu, new_ratings[i].sigma)
+        update_rating(list(rating_dict.keys()).index(p) + 2,
+                      new_ratings[i].mu, new_ratings[i].sigma)
 
 
 def process_matches():
@@ -138,12 +137,31 @@ def process_matches():
         processed = read_value(processed_cell)
         if not processed:
             process_match(matches[i])
-            write_value(processed_cell, ["TRUE"])
+            write_value(processed_cell, [["TRUE"]])
+
+
+def calculate_leaderboard():
+    rating_data = read_value("Ratings!A2:C")
+
+    name_list = []
+    rating_dict = {}
+    for n, m, s in rating_data:
+        rating_dict[n] = tk.Rating(float(m), float(s))
+        name_list.append(n)
+
+    leaderboard = sorted(list(rating_dict.values()), reverse=True)
+    leader_ranks = []
+    for s in leaderboard:
+        leader_ranks.append(list(rating_dict.keys())[list(rating_dict.values()).index(s)])
+
+    leader_ranks_values = [[i + 1, name] for i, name in enumerate(leader_ranks)]
+    write_value("Leaderboard!A2:B", leader_ranks_values)
 
 
 def main():
     init_players()
     process_matches()
+    calculate_leaderboard()
     exit()
 
     """Shows basic usage of the Sheets API.

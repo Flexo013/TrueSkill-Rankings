@@ -15,7 +15,8 @@ def run_2v2_match(results):
 
 def run_dynamic_match(results):
     """Run 1v1, 1v2, 2v1, and 2v2 matches.
-    Accepts 4 players as Rating() objects, in the order: [winner, winner, loser, loser].
+    Accepts 4 players as Rating() objects, in the order:
+    [winner, winner, loser, loser]
     The 2nd and 4th parameter can be None if the team only had 1 player.
     """
     winning_team = [results[0]]

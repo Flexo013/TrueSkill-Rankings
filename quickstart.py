@@ -44,7 +44,7 @@ def write_value(sheet_range, value_array):
 
     service = build("sheets", "v4", credentials=creds)
 
-    body = {"values": [value_array]}
+    body = {"values": value_array}
 
     # Call the Sheets API
     result = (
@@ -76,14 +76,14 @@ def init_players():
         if not processed:
             new_rating = tk.Rating()
             rating_cells = "Ratings!" + row_label + "C2:" + row_label + "C3"
-            write_value(rating_cells, [new_rating.mu, new_rating.sigma])
-            write_value(processed_cell, ["TRUE"])
+            write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
+            write_value(processed_cell, [["TRUE"]])
 
 
 def update_rating(row_number, mu, sigma):
     write_value(
         "Ratings!R{0}C2:R{0}C3".format(row_number),
-        [mu, sigma]
+        [[mu, sigma]]
     )
 
 
@@ -137,7 +137,7 @@ def process_matches():
         processed = read_value(processed_cell)
         if not processed:
             process_match(matches[i])
-            write_value(processed_cell, ["TRUE"])
+            write_value(processed_cell, [["TRUE"]])
 
 
 def calculate_leaderboard():

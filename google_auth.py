@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 import quickstart
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets", 'https://www.googleapis.com/auth/gmail.readonly']
 
 
 def store_creds():

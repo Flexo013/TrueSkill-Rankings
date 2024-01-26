@@ -62,6 +62,7 @@ if __name__ == "__main__":
 
     old_email_count = 0
     while True:
+        # Check for new matches via the Google Event Bus TM
         emails_found = check_email(creds)
         print("Found {0} emails labelled Foosball.".format(emails_found))
         if emails_found > old_email_count:

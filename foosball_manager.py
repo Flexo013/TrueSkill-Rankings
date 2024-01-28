@@ -306,6 +306,7 @@ def get_quality_teams(balancing_data):
 
     return best_combo
 
+
 def match_quality_checker():
     balancing_data = read_value(BALANCING_PROC_RANGE)
 
@@ -319,6 +320,7 @@ def match_quality_checker():
         team_1, team_2 = get_quality_teams(balancing_data)
         write_value(team_1_cell, [[team_1]])
         write_value(team_2_cell, [[team_1]])
+
 
 def main():
     tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)

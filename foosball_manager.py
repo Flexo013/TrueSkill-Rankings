@@ -111,6 +111,13 @@ def process_match(match_data):
         # Bogus input where a player occurs multiple times
         return
 
+    # if "" in result:
+    run_small_match(rating_dict, result, score_blue, score_red)
+    # else:
+    #     run_full_match(rating_dict, result, score_blue, score_red)
+
+
+def run_small_match(rating_dict, result, score_blue, score_red):
     old_ratings = []
     for p in result:
         if p == "":
@@ -119,10 +126,13 @@ def process_match(match_data):
             old_ratings.append(tk.Rating(rating_dict[p][0], rating_dict[p][1]))
 
     new_ratings = rating_logic.run_dynamic_match(old_ratings)
-
     for i, p in enumerate(filter(lambda name: name, result)):
-        update_rating(list(rating_dict.keys()).index(p) + 2,
+        update_rating(list(rating_dict.keys()).index(p) + 3,
                       new_ratings[i].mu, new_ratings[i].sigma)
+
+
+def run_full_match(rating_dict, result, score_blue, score_red):
+    score_delta = abs(score_blue - score_red) / 5.
 
 
 def process_matches():
@@ -150,7 +160,10 @@ def calculate_leaderboard():
         rating_dict[n] = tk.Rating(float(m), float(s))
         name_list.append(n)
 
-    leaderboard = sorted(((v, k) for k, v in rating_dict.items()), reverse=True)
+    leaderboard = sorted(
+        ((rating, name) for name, rating in rating_dict.items()),
+        key=lambda x: tk.expose(x[0]),
+        reverse=True)
 
     leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
     write_value(LEADERBOARD_OVERALL_RANGE, leader_ranks_values)

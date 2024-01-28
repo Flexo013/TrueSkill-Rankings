@@ -87,7 +87,7 @@ def update_rating(row_number, mu, sigma):
 
 
 def process_match(match_data):
-    rating_data = read_value(PLAYER_NAMES_PROC_RANGE)
+    rating_data = read_value(RATINGS_OVERALL_RANGE)
 
     rating_dict = {}
     for n, m, s in rating_data:
@@ -129,7 +129,7 @@ def process_matches():
         if len(matches[i]) > MATCH_ENTRY_CELL_COUNT:
             continue
 
-        row_number = i + int(MATCHES_PROC_RANGE[10])
+        row_number = i + int(MATCHES_PROC_RANGE[9])
         row_label = "R" + str(row_number)
         processed_cell = "Matches!" + row_label + "C8"
         processed = read_value(processed_cell)
@@ -147,12 +147,9 @@ def calculate_leaderboard():
         rating_dict[n] = tk.Rating(float(m), float(s))
         name_list.append(n)
 
-    leaderboard = sorted(list(rating_dict.values()), reverse=True)
-    leader_ranks = []
-    for s in leaderboard:
-        leader_ranks.append(list(rating_dict.keys())[list(rating_dict.values()).index(s)])
+    leaderboard = sorted(((v, k) for k, v in rating_dict.items()), reverse=True)
 
-    leader_ranks_values = [[i + 1, name] for i, name in enumerate(leader_ranks)]
+    leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
     write_value(LEADERBOARD_OVERALL_RANGE, leader_ranks_values)
 
 

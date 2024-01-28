@@ -89,6 +89,20 @@ def update_rating(row_number, mu, sigma):
     )
 
 
+def update_offense_rating(row_number, mu, sigma):
+    write_value(
+        "Ratings!R{0}C10:R{0}C11".format(row_number),
+        [[mu, sigma]]
+    )
+
+
+def update_defense_rating(row_number, mu, sigma):
+    write_value(
+        "Ratings!R{0}C14:R{0}C15".format(row_number),
+        [[mu, sigma]]
+    )
+
+
 def process_match(match_data):
     rating_data = read_value(RATINGS_OVERALL_RANGE)
 
@@ -111,10 +125,10 @@ def process_match(match_data):
         # Bogus input where a player occurs multiple times
         return
 
-    # if "" in result:
-    run_small_match(rating_dict, result, score_blue, score_red)
-    # else:
-    #     run_full_match(rating_dict, result, score_blue, score_red)
+    if "" in result:
+        run_small_match(rating_dict, result, score_blue, score_red)
+    else:
+        run_full_match(p1, p2, p3, p4, score_blue, score_red)
 
 
 def run_small_match(rating_dict, result, score_blue, score_red):
@@ -131,9 +145,54 @@ def run_small_match(rating_dict, result, score_blue, score_red):
                       new_ratings[i].mu, new_ratings[i].sigma)
 
 
-def run_full_match(rating_dict, result, score_blue, score_red):
+def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     score_delta = abs(score_blue - score_red) / 5.
 
+    offense_data = read_value(RATINGS_OFFENSE_RANGE)
+    offense_dict = {}
+    for n, m, s in offense_data:
+        offense_dict[n] = [float(m), float(s)]
+
+    defense_data = read_value(RATINGS_DEFENSE_RANGE)
+    defense_dict = {}
+    for n, m, s in defense_data:
+        defense_dict[n] = [float(m), float(s)]
+
+    # Calculate new ratings for players (OFFENSE/DEFENSE)
+    player_red_offense_old_rating_offense = tk.Rating(mu=offense_dict[red_off][0], sigma=offense_dict[red_off][1])
+    player_red_defense_old_rating_defense = tk.Rating(mu=defense_dict[red_def][0], sigma=defense_dict[red_def][1])
+    player_blue_offense_old_rating_offense = tk.Rating(mu=offense_dict[blue_off][0], sigma=offense_dict[blue_off][1])
+    player_blue_defense_old_rating_defense = tk.Rating(mu=defense_dict[blue_def][0], sigma=defense_dict[blue_def][1])
+
+    red_team = [player_red_offense_old_rating_offense, player_red_defense_old_rating_defense]
+    blue_team = [player_blue_offense_old_rating_offense, player_blue_defense_old_rating_defense]
+
+    # Team points are intentionally reverted!
+    (player_blue_offense_new_rating_offense, player_blue_defense_new_rating_defense), (
+        player_red_offense_new_rating_offense, player_red_defense_new_rating_defense) = tk.rate([blue_team, red_team],
+                                                                                                ranks=[score_red,
+                                                                                                       score_blue])
+    player_red_offense_new_rating_offense = tk.Rating(mu=player_red_offense_old_rating_offense.mu + (
+            player_red_offense_new_rating_offense.mu - player_red_offense_old_rating_offense.mu) * score_delta,
+                                                      sigma=player_red_offense_new_rating_offense.sigma)
+    player_red_defense_new_rating_defense = tk.Rating(mu=player_red_defense_old_rating_defense.mu + (
+            player_red_defense_new_rating_defense.mu - player_red_defense_old_rating_defense.mu) * score_delta,
+                                                      sigma=player_red_defense_new_rating_defense.sigma)
+    player_blue_offense_new_rating_offense = tk.Rating(mu=player_blue_offense_old_rating_offense.mu + (
+            player_blue_offense_new_rating_offense.mu - player_blue_offense_old_rating_offense.mu) * score_delta,
+                                                       sigma=player_blue_offense_new_rating_offense.sigma)
+    player_blue_defense_new_rating_defense = tk.Rating(mu=player_blue_defense_old_rating_defense.mu + (
+            player_blue_defense_new_rating_defense.mu - player_blue_defense_old_rating_defense.mu) * score_delta,
+                                                       sigma=player_blue_defense_new_rating_defense.sigma)
+
+    update_offense_rating(list(offense_dict.keys()).index(red_off) + 3,
+                          player_red_offense_new_rating_offense.mu, player_red_offense_new_rating_offense.sigma)
+    update_defense_rating(list(defense_dict.keys()).index(red_def) + 3,
+                          player_red_defense_new_rating_defense.mu, player_red_defense_new_rating_defense.sigma)
+    update_offense_rating(list(offense_dict.keys()).index(blue_off) + 3,
+                          player_blue_offense_new_rating_offense.mu, player_blue_offense_new_rating_offense.sigma)
+    update_defense_rating(list(defense_dict.keys()).index(blue_def) + 3,
+                          player_blue_defense_new_rating_defense.mu, player_blue_defense_new_rating_defense.sigma)
 
 def process_matches():
     matches = read_value(MATCHES_PROC_RANGE)

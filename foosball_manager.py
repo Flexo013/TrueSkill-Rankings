@@ -8,12 +8,14 @@ import google_auth
 import rating_logic
 
 MATCH_ENTRY_CELL_COUNT = 6
-
 NAME_ENTRY_CELL_COUNT = 1
 
-# The ID and range of a sample spreadsheet.
+# The ID and ranges of the spreadsheet.
 MAIN_SPREADSHEET_ID = "1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8"
 PLAYER_NAMES_RANGE = "Players!B2:B"
+PLAYER_NAMES_PROC_RANGE = "Players!B2:C"
+GENERAL_RATINGS_RANGE = "Ratings!A2:C"
+MATCHES_PROC_RANGE = "Matches!B2:H"
 
 
 def read_value(sheet_range):
@@ -63,7 +65,7 @@ def init_players():
         if len(names[i]) > NAME_ENTRY_CELL_COUNT:
             continue
 
-        row_number = i + 2
+        row_number = i + int(GENERAL_RATINGS_RANGE[10])
         row_label = "R" + str(row_number)
         processed_cell = "Players!" + row_label + "C3"
         processed = read_value(processed_cell)
@@ -82,7 +84,7 @@ def update_rating(row_number, mu, sigma):
 
 
 def process_match(match_data):
-    rating_data = read_value("Ratings!A2:C")
+    rating_data = read_value(PLAYER_NAMES_PROC_RANGE)
 
     rating_dict = {}
     for n, m, s in rating_data:
@@ -119,13 +121,13 @@ def process_match(match_data):
 
 
 def process_matches():
-    matches = read_value("Matches!B2:H")
+    matches = read_value(MATCHES_PROC_RANGE)
 
     for i in range(len(matches)):
         if len(matches[i]) > MATCH_ENTRY_CELL_COUNT:
             continue
 
-        row_number = i + 2
+        row_number = i + int(MATCHES_PROC_RANGE[10])
         row_label = "R" + str(row_number)
         processed_cell = "Matches!" + row_label + "C8"
         processed = read_value(processed_cell)
@@ -135,7 +137,7 @@ def process_matches():
 
 
 def calculate_leaderboard():
-    rating_data = read_value("Ratings!A2:C")
+    rating_data = read_value(GENERAL_RATINGS_RANGE)
 
     name_list = []
     rating_dict = {}

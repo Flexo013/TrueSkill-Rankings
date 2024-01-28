@@ -90,14 +90,14 @@ def update_overall_rating(row_number, mu, sigma):
 
 def update_offense_rating(row_number, mu, sigma):
     write_value(
-        "Ratings!R{0}C10:R{0}C11".format(row_number),
+        "Ratings!R{0}C6:R{0}C7".format(row_number),
         [[mu, sigma]]
     )
 
 
 def update_defense_rating(row_number, mu, sigma):
     write_value(
-        "Ratings!R{0}C14:R{0}C15".format(row_number),
+        "Ratings!R{0}C10:R{0}C11".format(row_number),
         [[mu, sigma]]
     )
 

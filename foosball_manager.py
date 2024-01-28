@@ -10,11 +10,12 @@ NAME_ENTRY_CELL_COUNT = 1
 
 # The ID and ranges of the spreadsheet.
 MAIN_SPREADSHEET_ID = "1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8"
-PLAYER_NAMES_RANGE = "Players!B2:B"
-PLAYER_NAMES_PROC_RANGE = "Players!B2:C"
+PLAYER_NAMES_RANGE = "Players!B3:B"
+PLAYER_NAMES_PROC_RANGE = "Players!B3:C"
 RATINGS_OVERALL_RANGE = "Ratings!A3:C"
-RATINGS_OFFENSE_RANGE = "Ratings!E3:G"
-RATINGS_DEFENSE_RANGE = "Ratings!I3:K"
+RATINGS_PODELTA_RANGE = "Ratings!E3:G"
+RATINGS_OFFENSE_RANGE = "Ratings!I3:K"
+RATINGS_DEFENSE_RANGE = "Ratings!M3:O"
 MATCHES_PROC_RANGE = "Matches!B2:H"
 LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
 LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
@@ -62,20 +63,22 @@ def write_value(sheet_range, value_array):
 
 
 def init_players():
-    names = read_value("Players!B2:C")
+    names = read_value(PLAYER_NAMES_PROC_RANGE)
 
     for i in range(len(names)):
         if len(names[i]) > NAME_ENTRY_CELL_COUNT:
             continue
 
-        row_number = i + int(RATINGS_OVERALL_RANGE[10])
-        row_label = "R" + str(row_number)
-        processed_cell = "Players!" + row_label + "C3"
+        row_number = i + int(PLAYER_NAMES_RANGE[9])
+        player_row_label = "R" + str(row_number)
+        rating_row_label = "R" + str(row_number)
+        processed_cell = "Players!" + player_row_label + "C3"
         processed = read_value(processed_cell)
         if not processed:
             new_rating = tk.Rating()
-            rating_cells = "Ratings!" + row_label + "C2:" + row_label + "C3"
-            write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
+            for j in range(2, 16, 4):
+                rating_cells = "Ratings!" + rating_row_label + "C" + str(j) + ":" + rating_row_label + "C" + str(j + 1)
+                write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
             write_value(processed_cell, [["TRUE"]])
 
 

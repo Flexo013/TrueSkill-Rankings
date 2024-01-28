@@ -6,6 +6,7 @@ import google_auth
 import rating_logic
 
 MATCH_ENTRY_CELL_COUNT = 6
+BALANCING_ENTRY_CELL_COUNT = 4
 NAME_ENTRY_CELL_COUNT = 1
 
 # The ID and ranges of the spreadsheet.
@@ -16,6 +17,7 @@ RATINGS_OVERALL_RANGE = "Ratings!A3:C"
 RATINGS_OFFENSE_RANGE = "Ratings!E3:G"
 RATINGS_DEFENSE_RANGE = "Ratings!I3:K"
 MATCHES_PROC_RANGE = "Matches!B2:H"
+BALANCING_PROC_RANGE = "Balancing!B2:G"
 LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
 LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
 LEADERBOARD_DEFENSE_RANGE = "Leaderboard!G3:H"
@@ -275,9 +277,53 @@ def calculate_leaderboard():
         write_value(leaderboard_range, leader_ranks_values)
 
 
+def get_quality_teams(balancing_data):
+    [[p1, p2, p3, p4]] = balancing_data
+
+    overall_data = read_value(RATINGS_OVERALL_RANGE)
+    overall_dict = {}
+    for n, m, s in overall_data:
+        overall_dict[n] = [float(m), float(s)]
+
+    p1_rating = tk.Rating(overall_dict[p1][0], overall_dict[p1][1])
+    p2_rating = tk.Rating(overall_dict[p2][0], overall_dict[p2][1])
+    p3_rating = tk.Rating(overall_dict[p3][0], overall_dict[p3][1])
+    p4_rating = tk.Rating(overall_dict[p4][0], overall_dict[p4][1])
+
+    quality_list = [
+        (tk.quality([[p1_rating, p2_rating], [p3_rating, p4_rating]]), [p1 + " " + p2, p3 + " " + p4]),
+        (tk.quality([[p1_rating, p3_rating], [p2_rating, p4_rating]]), [p1 + " " + p3, p2 + " " + p4]),
+        (tk.quality([[p1_rating, p4_rating], [p2_rating, p3_rating]]), [p1 + " " + p4, p2 + " " + p3]),
+    ]
+
+    min_draw_chance = 100
+    best_combo = ""
+    for i, (q, l) in enumerate(quality_list):
+        draw_chance = abs(q - 0.5)
+        if draw_chance < min_draw_chance:
+            min_draw_chance = draw_chance
+            best_combo = l
+
+    return best_combo
+
+def match_quality_checker():
+    balancing_data = read_value(BALANCING_PROC_RANGE)
+
+    for i in range(len(balancing_data)):
+        if len(balancing_data[i]) > BALANCING_ENTRY_CELL_COUNT:
+            continue
+
+        row_number = i + int(BALANCING_PROC_RANGE[11])
+        team_1_cell = "Balancing!{0}C6".format("R" + str(row_number))
+        team_2_cell = "Balancing!{0}C7".format("R" + str(row_number))
+        team_1, team_2 = get_quality_teams(balancing_data)
+        write_value(team_1_cell, [[team_1]])
+        write_value(team_2_cell, [[team_1]])
+
 def main():
     tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)
     init_players()
+    match_quality_checker()
     process_matches()
     calculate_leaderboard()
 

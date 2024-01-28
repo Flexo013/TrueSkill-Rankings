@@ -1,5 +1,3 @@
-from collections import Counter
-
 import trueskill as tk
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -106,8 +104,7 @@ def process_match(match_data):
         # We don't support draws
         return
 
-    max_occurrences = max(Counter(result).values())
-    if max_occurrences > 1:
+    if len(set(result)) != len(result):
         # Bogus input where a player occurs multiple times
         return
 

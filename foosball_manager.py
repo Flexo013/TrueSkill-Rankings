@@ -153,7 +153,7 @@ def calculate_leaderboard():
 
 
 def main():
-    env = tk.TrueSkill(1000, 333, 166, 3.3333, draw_probability=0.001)
+    tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)
     init_players()
     process_matches()
     calculate_leaderboard()

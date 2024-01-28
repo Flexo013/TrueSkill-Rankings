@@ -14,8 +14,13 @@ NAME_ENTRY_CELL_COUNT = 1
 MAIN_SPREADSHEET_ID = "1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8"
 PLAYER_NAMES_RANGE = "Players!B2:B"
 PLAYER_NAMES_PROC_RANGE = "Players!B2:C"
-GENERAL_RATINGS_RANGE = "Ratings!A2:C"
+RATINGS_OVERALL_RANGE = "Ratings!A3:C"
+RATINGS_OFFENSE_RANGE = "Ratings!E3:G"
+RATINGS_DEFENSE_RANGE = "Ratings!I3:K"
 MATCHES_PROC_RANGE = "Matches!B2:H"
+LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
+LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
+LEADERBOARD_DEFENSE_RANGE = "Leaderboard!G3:H"
 
 
 def read_value(sheet_range):
@@ -65,7 +70,7 @@ def init_players():
         if len(names[i]) > NAME_ENTRY_CELL_COUNT:
             continue
 
-        row_number = i + int(GENERAL_RATINGS_RANGE[10])
+        row_number = i + int(RATINGS_OVERALL_RANGE[10])
         row_label = "R" + str(row_number)
         processed_cell = "Players!" + row_label + "C3"
         processed = read_value(processed_cell)
@@ -137,7 +142,7 @@ def process_matches():
 
 
 def calculate_leaderboard():
-    rating_data = read_value(GENERAL_RATINGS_RANGE)
+    rating_data = read_value(RATINGS_OVERALL_RANGE)
 
     name_list = []
     rating_dict = {}
@@ -151,7 +156,7 @@ def calculate_leaderboard():
         leader_ranks.append(list(rating_dict.keys())[list(rating_dict.values()).index(s)])
 
     leader_ranks_values = [[i + 1, name] for i, name in enumerate(leader_ranks)]
-    write_value("Leaderboard!A2:B", leader_ranks_values)
+    write_value(LEADERBOARD_OVERALL_RANGE, leader_ranks_values)
 
 
 def main():

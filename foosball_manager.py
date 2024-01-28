@@ -194,6 +194,7 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     update_defense_rating(list(defense_dict.keys()).index(blue_def) + 3,
                           player_blue_defense_new_rating_defense.mu, player_blue_defense_new_rating_defense.sigma)
 
+
 def process_matches():
     matches = read_value(MATCHES_PROC_RANGE)
 
@@ -211,21 +212,27 @@ def process_matches():
 
 
 def calculate_leaderboard():
-    rating_data = read_value(RATINGS_OVERALL_RANGE)
+    boards = [
+        [RATINGS_OVERALL_RANGE, LEADERBOARD_OVERALL_RANGE],
+        [RATINGS_OFFENSE_RANGE, LEADERBOARD_OFFENSE_RANGE],
+        [RATINGS_DEFENSE_RANGE, LEADERBOARD_DEFENSE_RANGE],
+    ]
+    for rating_range, leaderboard_range in boards:
+        rating_data = read_value(rating_range)
 
-    name_list = []
-    rating_dict = {}
-    for n, m, s in rating_data:
-        rating_dict[n] = tk.Rating(float(m), float(s))
-        name_list.append(n)
+        name_list = []
+        rating_dict = {}
+        for n, m, s in rating_data:
+            rating_dict[n] = tk.Rating(float(m), float(s))
+            name_list.append(n)
 
-    leaderboard = sorted(
-        ((rating, name) for name, rating in rating_dict.items()),
-        key=lambda x: tk.expose(x[0]),
-        reverse=True)
+        leaderboard = sorted(
+            ((rating, name) for name, rating in rating_dict.items()),
+            key=lambda x: tk.expose(x[0]),
+            reverse=True)
 
-    leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
-    write_value(LEADERBOARD_OVERALL_RANGE, leader_ranks_values)
+        leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
+        write_value(leaderboard_range, leader_ranks_values)
 
 
 def main():

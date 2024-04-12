@@ -64,7 +64,7 @@ if __name__ == "__main__":
     while True:
         # Check for new matches via the Google Event Bus TM
         emails_found = check_email(creds)
-        print("Found {0} emails labelled Foosball.".format(emails_found))
+        print("Found {0} emails labeled Foosball.".format(emails_found))
         if emails_found > old_email_count:
             print("Executing processing script!")
             foosball_manager.main()

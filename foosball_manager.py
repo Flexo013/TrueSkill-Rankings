@@ -122,7 +122,7 @@ def process_match(match_data):
         # We don't support draws
         return
 
-    if len(set(result)) != len(result):
+    if len(set(result)) != len(result) and not(p2 == "" and p4 == ""):
         # Bogus input where a player occurs multiple times
         return
 

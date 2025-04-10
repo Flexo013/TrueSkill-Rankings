@@ -1,9 +1,7 @@
 import os.path
 import time
 
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -42,7 +40,6 @@ def check_email(credentials):
                 print("{0}".format(message["id"]))
 
     except HttpError as error:
-        # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
 
     exit()
@@ -53,9 +50,8 @@ def get_access_token(creds):
 
 
 if __name__ == "__main__":
-    # creds = get_gmail_credentials()
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", google_auth.SCOPES)
+    if os.path.exists(TOKEN_PATH):
+        creds = Credentials.from_authorized_user_file(TOKEN_PATH, google_auth.SCOPES)
     else:
         print("No token found!")
         exit()
@@ -64,7 +60,8 @@ if __name__ == "__main__":
     while True:
         # Check for new matches via the Google Event Bus TM
         emails_found = check_email(creds)
-        print("Found {0} emails labeled Foosball.".format(emails_found))
+        current_time = time.strftime("%H:%M:%S")
+        print("[{0}] Found {1} emails labeled Foosball.".format(current_time, emails_found))
         if emails_found > old_email_count:
             print("Executing processing script!")
             foosball_manager.main()

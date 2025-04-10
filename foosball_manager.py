@@ -319,7 +319,7 @@ def match_quality_checker():
         team_2_cell = "Balancing!{0}C7".format("R" + str(row_number))
         team_1, team_2 = get_quality_teams(balancing_data)
         write_value(team_1_cell, [[team_1]])
-        write_value(team_2_cell, [[team_1]])
+        write_value(team_2_cell, [[team_2]])
 
 
 def main():

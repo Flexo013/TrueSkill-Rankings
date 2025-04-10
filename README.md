@@ -4,4 +4,4 @@ A Python implementation of the [TrueSkill](https://trueskill.org/) ranking syste
 
 ## Foosball
 
-The current foosball rankings and leaderboard are managed by this repository's code. The [create player](https://docs.google.com/forms/d/e/1FAIpQLSe6t1b2XdOFceT9-mOzIVnFznLl1ZtgOAoBt6j9D5ipek-fcQ/viewform) and [submit match](https://docs.google.com/forms/u/0/d/e/1FAIpQLSeflIJn3-6S0LcnKtBoi0NXz4P_MIzsPnrvgv_zNzMMDRTzEQ/viewform) forms are the main way of interacting with the system. Leaderboard is yet to be implemented.
+The current foosball rankings and leaderboard are managed by this repository's code. The [create player](https://docs.google.com/forms/d/e/1FAIpQLSe6t1b2XdOFceT9-mOzIVnFznLl1ZtgOAoBt6j9D5ipek-fcQ/viewform) and [submit match](https://docs.google.com/forms/u/0/d/e/1FAIpQLSeflIJn3-6S0LcnKtBoi0NXz4P_MIzsPnrvgv_zNzMMDRTzEQ/viewform) forms are the main way of interacting with the system. Leaderboard can be found at this [Google Sheet](https://docs.google.com/spreadsheets/d/1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8/edit?resourcekey=&gid=1829137064#gid=1829137064).

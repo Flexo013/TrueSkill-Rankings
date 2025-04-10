@@ -127,12 +127,12 @@ def process_match(match_data):
         return
 
     if "" in result:
-        run_small_match(rating_dict, result, score_blue, score_red)
+        run_small_match(rating_dict, result)
     else:
         run_full_match(p1, p2, p3, p4, score_blue, score_red)
 
 
-def run_small_match(rating_dict, result, score_blue, score_red):
+def run_small_match(rating_dict, result):
     old_ratings = []
     for p in result:
         if p == "":

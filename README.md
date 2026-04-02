@@ -9,4 +9,5 @@ The current foosball rankings and leaderboard are managed by this repository's c
 # Setup
 
 1. Install the necessary python packages with `pip3 install -r requirements.txt`.
-2. Create a `token.json` file (currently not possible to obtain a token, more info will follow).
+2. Run `python3 google_auth.py` to authenticate with Google and create a `token.json`. This will fail if you have an old `token.json` file, delete it and reauthenticate.
+3. Run `python3 mail_checker.py` to run the project

@@ -66,6 +66,7 @@ if __name__ == "__main__":
             print("Executing processing script!")
             foosball_manager.main()
             old_email_count = emails_found
+            print("Done processing!")
 
         # Sleep for 30 seconds before checking again
         time.sleep(30)

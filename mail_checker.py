@@ -57,7 +57,7 @@ if __name__ == "__main__":
         exit()
 
     old_email_count = 0
-    while True:
+    while time.strftime("%A") in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] and "08:00:00" <= time.strftime("%H:%M:%S") <= "22:00:00":
         # Check for new matches via the Google Event Bus TM
         emails_found = check_email(creds)
         current_time = time.strftime("%H:%M:%S")
@@ -70,3 +70,4 @@ if __name__ == "__main__":
 
         # Sleep for 30 seconds before checking again
         time.sleep(30)
+    print("Outside of working hours, terminating...")

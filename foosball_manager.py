@@ -40,6 +40,18 @@ RATING_START_COLUMN_BY_CATEGORY = {
     RatingCategory.DEFENSE: 10,
 }
 
+RATING_RANGE_BY_CATEGORY = {
+    RatingCategory.OVERALL: RATINGS_OVERALL_RANGE,
+    RatingCategory.OFFENSE: RATINGS_OFFENSE_RANGE,
+    RatingCategory.DEFENSE: RATINGS_DEFENSE_RANGE,
+}
+
+LEADERBOARD_RANGE_BY_CATEGORY = {
+    RatingCategory.OVERALL: LEADERBOARD_OVERALL_RANGE,
+    RatingCategory.OFFENSE: LEADERBOARD_OFFENSE_RANGE,
+    RatingCategory.DEFENSE: LEADERBOARD_DEFENSE_RANGE,
+}
+
 
 def read_value(sheet_range):
     creds = Credentials.from_authorized_user_file("token.json", google_auth.SCOPES)
@@ -116,8 +128,8 @@ def scale_rating_update(old_rating, new_rating, factor):
     )
 
 
-def read_rating_dict(sheet_range):
-    rating_data = read_value(sheet_range)
+def read_rating_dict(category):
+    rating_data = read_value(RATING_RANGE_BY_CATEGORY[category])
     rating_dict = {}
     for n, m, s in rating_data:
         rating_dict[n] = [float(m), float(s)]
@@ -146,7 +158,7 @@ def calculate_score_factor(blue_team, red_team, score_blue, score_red):
 
 
 def process_match(match_data):
-    rating_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
+    rating_dict = read_rating_dict(RatingCategory.OVERALL)
 
     [p1, p2, p3, p4, score_red, score_blue] = match_data
     score_red = int(score_red)
@@ -190,7 +202,7 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     score_blue and score_red are the final team scores.
     """
     # Calculate new ratings for players (OVERALL)
-    overall_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
+    overall_dict = read_rating_dict(RatingCategory.OVERALL)
 
     player_red_offense_old_rating_overall = get_player_rating(overall_dict, red_off)
     player_red_defense_old_rating_overall = get_player_rating(overall_dict, red_def)
@@ -243,8 +255,8 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
                   player_blue_defense_new_rating_overall.mu, player_blue_defense_new_rating_overall.sigma)
 
     # Calculate new ratings for players (OFFENSE/DEFENSE)
-    offense_dict = read_rating_dict(RATINGS_OFFENSE_RANGE)
-    defense_dict = read_rating_dict(RATINGS_DEFENSE_RANGE)
+    offense_dict = read_rating_dict(RatingCategory.OFFENSE)
+    defense_dict = read_rating_dict(RatingCategory.DEFENSE)
 
     player_red_offense_old_rating_offense = get_player_rating(offense_dict, red_off)
     player_red_defense_old_rating_defense = get_player_rating(defense_dict, red_def)
@@ -313,13 +325,8 @@ def process_matches():
 
 
 def calculate_leaderboard():
-    boards = [
-        [RATINGS_OVERALL_RANGE, LEADERBOARD_OVERALL_RANGE],
-        [RATINGS_OFFENSE_RANGE, LEADERBOARD_OFFENSE_RANGE],
-        [RATINGS_DEFENSE_RANGE, LEADERBOARD_DEFENSE_RANGE],
-    ]
-    for rating_range, leaderboard_range in boards:
-        raw_rating_dict = read_rating_dict(rating_range)
+    for category in RatingCategory:
+        raw_rating_dict = read_rating_dict(category)
         rating_dict = {
             name: tk.Rating(mu=float(mu), sigma=float(sigma))
             for name, (mu, sigma) in raw_rating_dict.items()
@@ -331,7 +338,7 @@ def calculate_leaderboard():
             reverse=True)
 
         leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
-        write_value(leaderboard_range, leader_ranks_values)
+        write_value(LEADERBOARD_RANGE_BY_CATEGORY[category], leader_ranks_values)
 
 
 def get_quality_teams(balancing_data):

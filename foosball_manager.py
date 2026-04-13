@@ -311,7 +311,7 @@ def calculate_leaderboard():
     for rating_range, leaderboard_range in boards:
         raw_rating_dict = read_rating_dict(rating_range)
         rating_dict = {
-            name: tk.Rating(float(mu), float(sigma))
+            name: tk.Rating(mu=float(mu), sigma=float(sigma))
             for name, (mu, sigma) in raw_rating_dict.items()
         }
 

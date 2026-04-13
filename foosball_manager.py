@@ -115,6 +115,14 @@ def scale_rating_update(old_rating, new_rating, factor):
     )
 
 
+def read_rating_dict(sheet_range):
+    rating_data = read_value(sheet_range)
+    rating_dict = {}
+    for n, m, s in rating_data:
+        rating_dict[n] = [float(m), float(s)]
+    return rating_dict
+
+
 def calculate_score_factor(blue_team, red_team, score_blue, score_red):
     margin = abs(score_blue - score_red)
 
@@ -129,11 +137,7 @@ def calculate_score_factor(blue_team, red_team, score_blue, score_red):
 
 
 def process_match(match_data):
-    rating_data = read_value(RATINGS_OVERALL_RANGE)
-
-    rating_dict = {}
-    for n, m, s in rating_data:
-        rating_dict[n] = [float(m), float(s)]
+    rating_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
 
     [p1, p2, p3, p4, score_red, score_blue] = match_data
     score_red = int(score_red)
@@ -172,10 +176,7 @@ def run_small_match(rating_dict, result):
 
 def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     # Calculate new ratings for players (OVERALL)
-    overall_data = read_value(RATINGS_OVERALL_RANGE)
-    overall_dict = {}
-    for n, m, s in overall_data:
-        overall_dict[n] = [float(m), float(s)]
+    overall_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
 
     player_red_offense_old_rating_overall = tk.Rating(mu=overall_dict[red_off][0], sigma=overall_dict[red_off][1])
     player_red_defense_old_rating_overall = tk.Rating(mu=overall_dict[red_def][0], sigma=overall_dict[red_def][1])
@@ -228,15 +229,8 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
                           player_blue_defense_new_rating_overall.mu, player_blue_defense_new_rating_overall.sigma)
 
     # Calculate new ratings for players (OFFENSE/DEFENSE)
-    offense_data = read_value(RATINGS_OFFENSE_RANGE)
-    offense_dict = {}
-    for n, m, s in offense_data:
-        offense_dict[n] = [float(m), float(s)]
-
-    defense_data = read_value(RATINGS_DEFENSE_RANGE)
-    defense_dict = {}
-    for n, m, s in defense_data:
-        defense_dict[n] = [float(m), float(s)]
+    offense_dict = read_rating_dict(RATINGS_OFFENSE_RANGE)
+    defense_dict = read_rating_dict(RATINGS_DEFENSE_RANGE)
 
     player_red_offense_old_rating_offense = tk.Rating(mu=offense_dict[red_off][0], sigma=offense_dict[red_off][1])
     player_red_defense_old_rating_defense = tk.Rating(mu=defense_dict[red_def][0], sigma=defense_dict[red_def][1])
@@ -311,13 +305,11 @@ def calculate_leaderboard():
         [RATINGS_DEFENSE_RANGE, LEADERBOARD_DEFENSE_RANGE],
     ]
     for rating_range, leaderboard_range in boards:
-        rating_data = read_value(rating_range)
-
-        name_list = []
-        rating_dict = {}
-        for n, m, s in rating_data:
-            rating_dict[n] = tk.Rating(float(m), float(s))
-            name_list.append(n)
+        raw_rating_dict = read_rating_dict(rating_range)
+        rating_dict = {
+            name: tk.Rating(float(mu), float(sigma))
+            for name, (mu, sigma) in raw_rating_dict.items()
+        }
 
         leaderboard = sorted(
             ((rating, name) for name, rating in rating_dict.items()),

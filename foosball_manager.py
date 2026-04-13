@@ -179,6 +179,11 @@ def run_small_match(rating_dict, result):
 
 
 def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
+    """Process a 2v2 foosball match.
+
+    red_off, red_def, blue_off, and blue_def are player name strings.
+    score_blue and score_red are the final team scores.
+    """
     # Calculate new ratings for players (OVERALL)
     overall_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
 

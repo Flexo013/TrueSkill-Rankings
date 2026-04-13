@@ -123,6 +123,10 @@ def read_rating_dict(sheet_range):
     return rating_dict
 
 
+def get_player_rating(rating_dict, player_name):
+    return tk.Rating(mu=rating_dict[player_name][0], sigma=rating_dict[player_name][1])
+
+
 def calculate_score_factor(blue_team, red_team, score_blue, score_red):
     margin = abs(score_blue - score_red)
 
@@ -166,7 +170,7 @@ def run_small_match(rating_dict, result):
         if p == "":
             old_ratings.append(None)
         else:
-            old_ratings.append(tk.Rating(rating_dict[p][0], rating_dict[p][1]))
+            old_ratings.append(get_player_rating(rating_dict, p))
 
     new_ratings = rating_logic.run_dynamic_match(old_ratings)
     for i, p in enumerate(filter(lambda name: name, result)):
@@ -178,10 +182,10 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     # Calculate new ratings for players (OVERALL)
     overall_dict = read_rating_dict(RATINGS_OVERALL_RANGE)
 
-    player_red_offense_old_rating_overall = tk.Rating(mu=overall_dict[red_off][0], sigma=overall_dict[red_off][1])
-    player_red_defense_old_rating_overall = tk.Rating(mu=overall_dict[red_def][0], sigma=overall_dict[red_def][1])
-    player_blue_offense_old_rating_overall = tk.Rating(mu=overall_dict[blue_off][0], sigma=overall_dict[blue_off][1])
-    player_blue_defense_old_rating_overall = tk.Rating(mu=overall_dict[blue_def][0], sigma=overall_dict[blue_def][1])
+    player_red_offense_old_rating_overall = get_player_rating(overall_dict, red_off)
+    player_red_defense_old_rating_overall = get_player_rating(overall_dict, red_def)
+    player_blue_offense_old_rating_overall = get_player_rating(overall_dict, blue_off)
+    player_blue_defense_old_rating_overall = get_player_rating(overall_dict, blue_def)
 
     blue_team = [player_blue_offense_old_rating_overall, player_blue_defense_old_rating_overall]
     red_team = [player_red_offense_old_rating_overall, player_red_defense_old_rating_overall]
@@ -232,10 +236,10 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
     offense_dict = read_rating_dict(RATINGS_OFFENSE_RANGE)
     defense_dict = read_rating_dict(RATINGS_DEFENSE_RANGE)
 
-    player_red_offense_old_rating_offense = tk.Rating(mu=offense_dict[red_off][0], sigma=offense_dict[red_off][1])
-    player_red_defense_old_rating_defense = tk.Rating(mu=defense_dict[red_def][0], sigma=defense_dict[red_def][1])
-    player_blue_offense_old_rating_offense = tk.Rating(mu=offense_dict[blue_off][0], sigma=offense_dict[blue_off][1])
-    player_blue_defense_old_rating_defense = tk.Rating(mu=defense_dict[blue_def][0], sigma=defense_dict[blue_def][1])
+    player_red_offense_old_rating_offense = get_player_rating(offense_dict, red_off)
+    player_red_defense_old_rating_defense = get_player_rating(defense_dict, red_def)
+    player_blue_offense_old_rating_offense = get_player_rating(offense_dict, blue_off)
+    player_blue_defense_old_rating_defense = get_player_rating(defense_dict, blue_def)
 
     red_team = [player_red_offense_old_rating_offense, player_red_defense_old_rating_defense]
     blue_team = [player_blue_offense_old_rating_offense, player_blue_defense_old_rating_defense]

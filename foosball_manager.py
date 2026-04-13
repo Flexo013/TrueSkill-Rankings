@@ -21,6 +21,10 @@ BALANCING_PROC_RANGE = "Balancing!B2:G"
 LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
 LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
 LEADERBOARD_DEFENSE_RANGE = "Leaderboard!G3:H"
+MIN_SCORE_FACTOR = 0.75
+MAX_SCORE_FACTOR = 1.25
+QUALITY_MIN_FACTOR = 0.85
+QUALITY_FACTOR_SPAN = 0.3
 
 
 def read_value(sheet_range):
@@ -111,6 +115,19 @@ def scale_rating_update(old_rating, new_rating, factor):
     )
 
 
+def calculate_score_factor(blue_team, red_team, score_blue, score_red):
+    margin = abs(score_blue - score_red)
+
+    # Score Factor: Linear margin scaling, capped at 1.25
+    scaled_margin = MIN_SCORE_FACTOR + margin / 20.0
+    score_factor = min(MAX_SCORE_FACTOR, scaled_margin)
+
+    # Quality Factor: Damp score impact for uneven matchups and boost it slightly for balanced ones.
+    quality_factor = QUALITY_MIN_FACTOR + QUALITY_FACTOR_SPAN * tk.quality([blue_team, red_team])
+
+    return score_factor * quality_factor
+
+
 def process_match(match_data):
     rating_data = read_value(RATINGS_OVERALL_RANGE)
 
@@ -154,8 +171,6 @@ def run_small_match(rating_dict, result):
 
 
 def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
-    score_delta = abs(score_blue - score_red) / 5.
-
     # Calculate new ratings for players (OVERALL)
     overall_data = read_value(RATINGS_OVERALL_RANGE)
     overall_dict = {}
@@ -169,6 +184,7 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
 
     blue_team = [player_blue_offense_old_rating_overall, player_blue_defense_old_rating_overall]
     red_team = [player_red_offense_old_rating_overall, player_red_defense_old_rating_overall]
+    score_delta = calculate_score_factor(blue_team, red_team, score_blue, score_red)
 
     # Raw scores do not affect the TrueSkill update directly; only winner/loser order does.
     team_ranks = [0, 1] if score_blue > score_red else [1, 0]
@@ -229,6 +245,7 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
 
     red_team = [player_red_offense_old_rating_offense, player_red_defense_old_rating_defense]
     blue_team = [player_blue_offense_old_rating_offense, player_blue_defense_old_rating_defense]
+    score_delta = calculate_score_factor(blue_team, red_team, score_blue, score_red)
 
     # Raw scores do not affect the TrueSkill update directly; only winner/loser order does.
     team_ranks = [0, 1] if score_blue > score_red else [1, 0]

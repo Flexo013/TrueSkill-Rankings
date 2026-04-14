@@ -1,4 +1,5 @@
 import trueskill as tk
+from dataclasses import dataclass
 from enum import Enum
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -14,14 +15,9 @@ NAME_ENTRY_CELL_COUNT = 1
 MAIN_SPREADSHEET_ID = "1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8"
 PLAYER_NAMES_RANGE = "Players!B3:B"
 PLAYER_NAMES_PROC_RANGE = "Players!B3:C"
-RATINGS_OVERALL_RANGE = "Ratings!A3:C"
-RATINGS_OFFENSE_RANGE = "Ratings!E3:G"
-RATINGS_DEFENSE_RANGE = "Ratings!I3:K"
 MATCHES_PROC_RANGE = "Matches!B2:H"
 BALANCING_PROC_RANGE = "Balancing!B2:G"
-LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
-LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
-LEADERBOARD_DEFENSE_RANGE = "Leaderboard!G3:H"
+# Score impact factors
 MIN_SCORE_FACTOR = 0.75
 MAX_SCORE_FACTOR = 1.25
 QUALITY_MIN_FACTOR = 0.85
@@ -34,22 +30,29 @@ class RatingCategory(Enum):
     DEFENSE = "defense"
 
 
-RATING_START_COLUMN_BY_CATEGORY = {
-    RatingCategory.OVERALL: 2,
-    RatingCategory.OFFENSE: 6,
-    RatingCategory.DEFENSE: 10,
-}
+@dataclass(frozen=True)
+class RatingCategoryConfig:
+    rating_range: str
+    leaderboard_range: str
+    start_col: int
 
-RATING_RANGE_BY_CATEGORY = {
-    RatingCategory.OVERALL: RATINGS_OVERALL_RANGE,
-    RatingCategory.OFFENSE: RATINGS_OFFENSE_RANGE,
-    RatingCategory.DEFENSE: RATINGS_DEFENSE_RANGE,
-}
 
-LEADERBOARD_RANGE_BY_CATEGORY = {
-    RatingCategory.OVERALL: LEADERBOARD_OVERALL_RANGE,
-    RatingCategory.OFFENSE: LEADERBOARD_OFFENSE_RANGE,
-    RatingCategory.DEFENSE: LEADERBOARD_DEFENSE_RANGE,
+RATING_CATEGORY_CONFIG = {
+    RatingCategory.OVERALL: RatingCategoryConfig(
+        rating_range="Ratings!A3:C",
+        leaderboard_range="Leaderboard!A3:B",
+        start_col=2,
+    ),
+    RatingCategory.OFFENSE: RatingCategoryConfig(
+        rating_range="Ratings!E3:G",
+        leaderboard_range="Leaderboard!D3:E",
+        start_col=6,
+    ),
+    RatingCategory.DEFENSE: RatingCategoryConfig(
+        rating_range="Ratings!I3:K",
+        leaderboard_range="Leaderboard!G3:H",
+        start_col=10,
+    ),
 }
 
 
@@ -114,7 +117,7 @@ def init_players():
 
 
 def update_rating(category, row_number, mu, sigma):
-    start_col = RATING_START_COLUMN_BY_CATEGORY[category]
+    start_col = RATING_CATEGORY_CONFIG[category].start_col
     write_value(
         "Ratings!R{0}C{1}:R{0}C{2}".format(row_number, start_col, start_col + 1),
         [[mu, sigma]]
@@ -129,7 +132,7 @@ def scale_rating_update(old_rating, new_rating, factor):
 
 
 def read_rating_dict(category):
-    rating_data = read_value(RATING_RANGE_BY_CATEGORY[category])
+    rating_data = read_value(RATING_CATEGORY_CONFIG[category].rating_range)
     rating_dict = {}
     for n, m, s in rating_data:
         rating_dict[n] = [float(m), float(s)]
@@ -338,13 +341,13 @@ def calculate_leaderboard():
             reverse=True)
 
         leader_ranks_values = [[i + 1, name] for i, (r, name) in enumerate(leaderboard)]
-        write_value(LEADERBOARD_RANGE_BY_CATEGORY[category], leader_ranks_values)
+        write_value(RATING_CATEGORY_CONFIG[category].leaderboard_range, leader_ranks_values)
 
 
 def get_quality_teams(balancing_data):
     [[p1, p2, p3, p4]] = balancing_data
 
-    overall_data = read_value(RATINGS_OVERALL_RANGE)
+    overall_data = read_value(RATING_CATEGORY_CONFIG[RatingCategory.OVERALL].rating_range)
     overall_dict = {}
     for n, m, s in overall_data:
         overall_dict[n] = [float(m), float(s)]

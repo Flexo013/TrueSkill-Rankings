@@ -98,6 +98,15 @@ def write_value(sheet_range, value_array):
 
 def init_players():
     names = read_value(PLAYER_NAMES_PROC_RANGE)
+    player_names = [ # Convert to strings to ensure set logic works to catch duplicates
+        str(row[0]).strip()
+        for row in names
+        if row and str(row[0]).strip()
+    ]
+
+    if len(set(player_names)) != len(player_names):
+        print("Found duplicate player, aborting this run.")
+        return False
 
     for i in range(len(names)):
         if len(names[i]) > NAME_ENTRY_CELL_COUNT:
@@ -114,6 +123,8 @@ def init_players():
                 rating_cells = "Ratings!" + rating_row_label + "C" + str(j) + ":" + rating_row_label + "C" + str(j + 1)
                 write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
             write_value(processed_cell, [["TRUE"]])
+
+    return True
 
 
 def update_rating(category, row_number, mu, sigma):
@@ -391,7 +402,8 @@ def match_quality_checker():
 
 def main():
     tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)
-    init_players()
+    if not init_players():
+        return
     match_quality_checker()
     process_matches()
     calculate_leaderboard()

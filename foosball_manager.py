@@ -21,6 +21,10 @@ BALANCING_PROC_RANGE = "Balancing!B2:G"
 LEADERBOARD_OVERALL_RANGE = "Leaderboard!A3:B"
 LEADERBOARD_OFFENSE_RANGE = "Leaderboard!D3:E"
 LEADERBOARD_DEFENSE_RANGE = "Leaderboard!G3:H"
+MIN_SCORE_FACTOR = 0.75
+MAX_SCORE_FACTOR = 1.25
+QUALITY_MIN_FACTOR = 0.85
+QUALITY_FACTOR_SPAN = 0.3
 
 
 def read_value(sheet_range):
@@ -104,6 +108,26 @@ def update_defense_rating(row_number, mu, sigma):
     )
 
 
+def scale_rating_update(old_rating, new_rating, factor):
+    return tk.Rating(
+        mu=old_rating.mu + (new_rating.mu - old_rating.mu) * factor,
+        sigma=old_rating.sigma + (new_rating.sigma - old_rating.sigma) * factor,
+    )
+
+
+def calculate_score_factor(blue_team, red_team, score_blue, score_red):
+    margin = abs(score_blue - score_red)
+
+    # Score Factor: Linear margin scaling, capped at 1.25
+    scaled_margin = MIN_SCORE_FACTOR + margin / 20.0
+    score_factor = min(MAX_SCORE_FACTOR, scaled_margin)
+
+    # Quality Factor: Damp score impact for uneven matchups and boost it slightly for balanced ones.
+    quality_factor = QUALITY_MIN_FACTOR + QUALITY_FACTOR_SPAN * tk.quality([blue_team, red_team])
+
+    return score_factor * quality_factor
+
+
 def process_match(match_data):
     rating_data = read_value(RATINGS_OVERALL_RANGE)
 
@@ -147,8 +171,6 @@ def run_small_match(rating_dict, result):
 
 
 def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
-    score_delta = abs(score_blue - score_red) / 5.
-
     # Calculate new ratings for players (OVERALL)
     overall_data = read_value(RATINGS_OVERALL_RANGE)
     overall_dict = {}
@@ -162,24 +184,39 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
 
     blue_team = [player_blue_offense_old_rating_overall, player_blue_defense_old_rating_overall]
     red_team = [player_red_offense_old_rating_overall, player_red_defense_old_rating_overall]
+    score_delta = calculate_score_factor(blue_team, red_team, score_blue, score_red)
 
-    # Team points are intentionally reverted!
-    (player_blue_offense_new_rating_overall, player_blue_defense_new_rating_overall), (
-        player_red_offense_new_rating_overall, player_red_defense_new_rating_overall) = tk.rate([blue_team, red_team],
-                                                                                                ranks=[score_red,
-                                                                                                       score_blue])
-    player_red_offense_new_rating_overall = tk.Rating(mu=player_red_offense_old_rating_overall.mu + (
-            player_red_offense_new_rating_overall.mu - player_red_offense_old_rating_overall.mu) * score_delta,
-                                                      sigma=player_red_offense_new_rating_overall.sigma)
-    player_red_defense_new_rating_overall = tk.Rating(mu=player_red_defense_old_rating_overall.mu + (
-            player_red_defense_new_rating_overall.mu - player_red_defense_old_rating_overall.mu) * score_delta,
-                                                      sigma=player_red_defense_new_rating_overall.sigma)
-    player_blue_offense_new_rating_overall = tk.Rating(mu=player_blue_offense_old_rating_overall.mu + (
-            player_blue_offense_new_rating_overall.mu - player_blue_offense_old_rating_overall.mu) * score_delta,
-                                                       sigma=player_blue_offense_new_rating_overall.sigma)
-    player_blue_defense_new_rating_overall = tk.Rating(mu=player_blue_defense_old_rating_overall.mu + (
-            player_blue_defense_new_rating_overall.mu - player_blue_defense_old_rating_overall.mu) * score_delta,
-                                                       sigma=player_blue_defense_new_rating_overall.sigma)
+    # Raw scores do not affect the TrueSkill update directly; only winner/loser order does.
+    team_ranks = [0, 1] if score_blue > score_red else [1, 0]
+
+    (
+        blue_team_new_ratings_overall,
+        red_team_new_ratings_overall,
+    ) = tk.rate(
+        [blue_team, red_team],
+        ranks=team_ranks
+    )
+    (
+        player_blue_offense_new_rating_overall,
+        player_blue_defense_new_rating_overall,
+    ) = blue_team_new_ratings_overall
+    (
+        player_red_offense_new_rating_overall,
+        player_red_defense_new_rating_overall,
+    ) = red_team_new_ratings_overall
+
+    player_red_offense_new_rating_overall = scale_rating_update(
+        player_red_offense_old_rating_overall, player_red_offense_new_rating_overall, score_delta
+    )
+    player_red_defense_new_rating_overall = scale_rating_update(
+        player_red_defense_old_rating_overall, player_red_defense_new_rating_overall, score_delta
+    )
+    player_blue_offense_new_rating_overall = scale_rating_update(
+        player_blue_offense_old_rating_overall, player_blue_offense_new_rating_overall, score_delta
+    )
+    player_blue_defense_new_rating_overall = scale_rating_update(
+        player_blue_defense_old_rating_overall, player_blue_defense_new_rating_overall, score_delta
+    )
 
     update_overall_rating(list(overall_dict.keys()).index(red_off) + 3,
                           player_red_offense_new_rating_overall.mu, player_red_offense_new_rating_overall.sigma)
@@ -208,24 +245,38 @@ def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):
 
     red_team = [player_red_offense_old_rating_offense, player_red_defense_old_rating_defense]
     blue_team = [player_blue_offense_old_rating_offense, player_blue_defense_old_rating_defense]
+    score_delta = calculate_score_factor(blue_team, red_team, score_blue, score_red)
 
-    # Team points are intentionally reverted!
-    (player_blue_offense_new_rating_offense, player_blue_defense_new_rating_defense), (
-        player_red_offense_new_rating_offense, player_red_defense_new_rating_defense) = tk.rate([blue_team, red_team],
-                                                                                                ranks=[score_red,
-                                                                                                       score_blue])
-    player_red_offense_new_rating_offense = tk.Rating(mu=player_red_offense_old_rating_offense.mu + (
-            player_red_offense_new_rating_offense.mu - player_red_offense_old_rating_offense.mu) * score_delta,
-                                                      sigma=player_red_offense_new_rating_offense.sigma)
-    player_red_defense_new_rating_defense = tk.Rating(mu=player_red_defense_old_rating_defense.mu + (
-            player_red_defense_new_rating_defense.mu - player_red_defense_old_rating_defense.mu) * score_delta,
-                                                      sigma=player_red_defense_new_rating_defense.sigma)
-    player_blue_offense_new_rating_offense = tk.Rating(mu=player_blue_offense_old_rating_offense.mu + (
-            player_blue_offense_new_rating_offense.mu - player_blue_offense_old_rating_offense.mu) * score_delta,
-                                                       sigma=player_blue_offense_new_rating_offense.sigma)
-    player_blue_defense_new_rating_defense = tk.Rating(mu=player_blue_defense_old_rating_defense.mu + (
-            player_blue_defense_new_rating_defense.mu - player_blue_defense_old_rating_defense.mu) * score_delta,
-                                                       sigma=player_blue_defense_new_rating_defense.sigma)
+    # Raw scores do not affect the TrueSkill update directly; only winner/loser order does.
+    team_ranks = [0, 1] if score_blue > score_red else [1, 0]
+
+    (
+        blue_team_new_ratings_offense_defense,
+        red_team_new_ratings_offense_defense,
+    ) = tk.rate(
+        [blue_team, red_team],
+        ranks=team_ranks
+    )
+    (
+        player_blue_offense_new_rating_offense,
+        player_blue_defense_new_rating_defense,
+    ) = blue_team_new_ratings_offense_defense
+    (
+        player_red_offense_new_rating_offense,
+        player_red_defense_new_rating_defense,
+    ) = red_team_new_ratings_offense_defense
+    player_red_offense_new_rating_offense = scale_rating_update(
+        player_red_offense_old_rating_offense, player_red_offense_new_rating_offense, score_delta
+    )
+    player_red_defense_new_rating_defense = scale_rating_update(
+        player_red_defense_old_rating_defense, player_red_defense_new_rating_defense, score_delta
+    )
+    player_blue_offense_new_rating_offense = scale_rating_update(
+        player_blue_offense_old_rating_offense, player_blue_offense_new_rating_offense, score_delta
+    )
+    player_blue_defense_new_rating_defense = scale_rating_update(
+        player_blue_defense_old_rating_defense, player_blue_defense_new_rating_defense, score_delta
+    )
 
     update_offense_rating(list(offense_dict.keys()).index(red_off) + 3,
                           player_red_offense_new_rating_offense.mu, player_red_offense_new_rating_offense.sigma)

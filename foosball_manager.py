@@ -22,6 +22,7 @@ MIN_SCORE_FACTOR = 0.75
 MAX_SCORE_FACTOR = 1.25
 QUALITY_MIN_FACTOR = 0.85
 QUALITY_FACTOR_SPAN = 0.3
+STANDARD_MATCH_TARGET_SCORE = 10
 
 
 class RatingCategory(Enum):
@@ -158,8 +159,13 @@ def get_player_row_number(rating_dict, player_name):
     return list(rating_dict.keys()).index(player_name) + 3
 
 
+def calculate_match_length_factor(target_score):
+    return 0.5 + 0.5 * (target_score / STANDARD_MATCH_TARGET_SCORE)
+
+
 def calculate_score_factor(blue_team, red_team, score_blue, score_red):
     margin = abs(score_blue - score_red)
+    target_score = max(score_blue, score_red)
 
     # Score Factor: Linear margin scaling, capped at 1.25
     scaled_margin = MIN_SCORE_FACTOR + margin / 20.0
@@ -168,7 +174,9 @@ def calculate_score_factor(blue_team, red_team, score_blue, score_red):
     # Quality Factor: Damp score impact for uneven matchups and boost it slightly for balanced ones.
     quality_factor = QUALITY_MIN_FACTOR + QUALITY_FACTOR_SPAN * tk.quality([blue_team, red_team])
 
-    return score_factor * quality_factor
+    match_length_factor = calculate_match_length_factor(target_score)
+
+    return score_factor * quality_factor * match_length_factor
 
 
 def process_match(match_data):

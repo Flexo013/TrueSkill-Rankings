@@ -1,6 +1,7 @@
 import trueskill as tk
 from dataclasses import dataclass
 from enum import Enum
+import math
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -157,6 +158,11 @@ def get_player_rating(rating_dict, player_name):
 
 def get_player_row_number(rating_dict, player_name):
     return list(rating_dict.keys()).index(player_name) + 3
+
+
+def is_default_rating(rating):
+    env = tk.global_env()
+    return math.isclose(rating.mu, env.mu) and math.isclose(rating.sigma, env.sigma)
 
 
 def calculate_match_length_factor(target_score):
@@ -352,6 +358,11 @@ def calculate_leaderboard():
         rating_dict = {
             name: tk.Rating(mu=float(mu), sigma=float(sigma))
             for name, (mu, sigma) in raw_rating_dict.items()
+        }
+        rating_dict = {
+            name: rating
+            for name, rating in rating_dict.items()
+            if not is_default_rating(rating)
         }
 
         leaderboard = sorted(

@@ -125,9 +125,10 @@ def init_players():
         rating_row_label = "R" + str(row_number)
         processed_cell = "Players!" + player_row_label + "C3"
         processed = read_value(processed_cell)
+
         if not processed:
             new_rating = tk.Rating()
-            for j in range(2, 12, 4):
+            for j in range(2, 16, 4):
                 rating_cells = "Ratings!" + rating_row_label + "C" + str(j) + ":" + rating_row_label + "C" + str(j + 1)
                 write_value(rating_cells, [[new_rating.mu, new_rating.sigma]])
             write_value(processed_cell, [["TRUE"]])

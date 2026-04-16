@@ -30,6 +30,7 @@ class RatingCategory(Enum):
     OVERALL = "overall"
     OFFENSE = "offense"
     DEFENSE = "defense"
+    SOLO = "solo"
 
 
 @dataclass(frozen=True)
@@ -54,6 +55,11 @@ RATING_CATEGORY_CONFIG = {
         rating_range="Ratings!I3:K",
         leaderboard_range="Leaderboard!G3:H",
         start_col=10,
+    ),
+    RatingCategory.SOLO: RatingCategoryConfig(
+        rating_range="Ratings!M3:O",
+        leaderboard_range="Leaderboard!J3:K",
+        start_col=14,
     ),
 }
 
@@ -221,6 +227,19 @@ def run_small_match(rating_dict, result):
     for i, p in enumerate(filter(lambda name: name, result)):
         update_rating(RatingCategory.OVERALL, get_player_row_number(rating_dict, p),
                       new_ratings[i].mu, new_ratings[i].sigma)
+
+    solo_rating_dict = read_rating_dict(RatingCategory.SOLO)
+    old_solo_ratings = []
+    for p in result:
+        if p == "":
+            old_solo_ratings.append(None)
+        else:
+            old_solo_ratings.append(get_player_rating(solo_rating_dict, p))
+
+    new_solo_ratings = rating_logic.run_dynamic_match(old_solo_ratings)
+    for i, p in enumerate(filter(lambda name: name, result)):
+        update_rating(RatingCategory.SOLO, get_player_row_number(solo_rating_dict, p),
+                      new_solo_ratings[i].mu, new_solo_ratings[i].sigma)
 
 
 def run_full_match(red_off, red_def, blue_off, blue_def, score_blue, score_red):

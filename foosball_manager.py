@@ -20,9 +20,11 @@ NAME_ENTRY_CELL_COUNT = 1
 
 # The ID and ranges of the spreadsheet.
 MAIN_SPREADSHEET_ID = "1ij0SE4S9ZPYfDm8_JW4PFMnbDvhp6hmlIckQN1fKUQ8"
+MATCHES_SHEET_ID = 1968610830
 PLAYER_NAMES_RANGE = "Players!B3:B"
 PLAYER_NAMES_PROC_RANGE = "Players!B3:C"
 MATCHES_PROC_RANGE = "Matches!B2:H"
+MATCHES_FULL_RANGE = "Matches!A2:H"
 BALANCING_PROC_RANGE = "Balancing!B2:G"
 # Score impact factors
 MIN_SCORE_FACTOR = 0.75
@@ -68,6 +70,10 @@ RATING_CATEGORY_CONFIG = {
         start_col=14,
     ),
 }
+
+
+def setup_trueskill_env():
+    tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)
 
 
 def execute_with_backoff(request):
@@ -123,6 +129,22 @@ def write_value(sheet_range, value_array):
     )
 
     print(result)
+
+
+def batch_update(requests):
+    creds = Credentials.from_authorized_user_file("token.json", google_auth.SCOPES)
+
+    service = build("sheets", "v4", credentials=creds)
+
+    result = execute_with_backoff(
+        service.spreadsheets().batchUpdate(
+            spreadsheetId=MAIN_SPREADSHEET_ID,
+            body={"requests": requests},
+        )
+    )
+
+    print(result)
+    return result
 
 
 def init_players():
@@ -398,6 +420,68 @@ def process_matches():
             write_value(processed_cell, [["TRUE"]])
 
 
+def find_match_row(timestamp):
+    """Returns (0-indexed sheet row, full row data) for the match with this exact
+    timestamp, or (None, None) if no match is found."""
+    rows = read_value(MATCHES_FULL_RANGE)
+    for i, row in enumerate(rows):
+        if row and row[0].strip() == timestamp:
+            return i + 1, row  # +1 because MATCHES_FULL_RANGE starts at row 2
+    return None, None
+
+
+def delete_match_row(row_index):
+    """row_index is 0-indexed within the sheet (header row is 0)."""
+    batch_update([{
+        "deleteDimension": {
+            "range": {
+                "sheetId": MATCHES_SHEET_ID,
+                "dimension": "ROWS",
+                "startIndex": row_index,
+                "endIndex": row_index + 1,
+            }
+        }
+    }])
+
+
+def reset_ratings():
+    default_rating = tk.Rating()
+    for category in RatingCategory:
+        rating_dict = read_rating_dict(category)
+        for row_number, _ in enumerate(rating_dict.keys(), start=3):
+            update_rating(category, row_number, default_rating.mu, default_rating.sigma)
+
+
+def replay_all_matches():
+    matches = read_value(MATCHES_PROC_RANGE)
+    for row in matches:
+        if len(row) < MATCH_ENTRY_CELL_COUNT:
+            continue
+        process_match(row[:MATCH_ENTRY_CELL_COUNT])
+
+
+def revert_match(timestamp):
+    """Deletes the match with the given timestamp and recomputes every rating
+    and the leaderboard from scratch by replaying the remaining match history.
+    Note: any later match involving the same players will end up with slightly
+    different ratings than before, since the whole history is recomputed."""
+    row_index, row = find_match_row(timestamp)
+    if row_index is None:
+        raise ValueError("No match found with timestamp '{0}'".format(timestamp))
+
+    print("Deleting match: {0}".format(row))
+    delete_match_row(row_index)
+
+    print("Resetting all ratings to defaults...")
+    reset_ratings()
+
+    print("Replaying remaining match history...")
+    replay_all_matches()
+
+    print("Recalculating leaderboard...")
+    calculate_leaderboard()
+
+
 def calculate_leaderboard():
     for category in RatingCategory:
         raw_rating_dict = read_rating_dict(category)
@@ -466,7 +550,7 @@ def match_quality_checker():
 
 
 def main():
-    tk.setup(1000, 333, 166, 3.3333, draw_probability=0.001)
+    setup_trueskill_env()
     if not init_players():
         return
     match_quality_checker()

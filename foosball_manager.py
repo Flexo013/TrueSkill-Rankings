@@ -2,11 +2,17 @@ import trueskill as tk
 from dataclasses import dataclass
 from enum import Enum
 import math
+import random
+import time
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 import google_auth
 import rating_logic
+
+RATE_LIMIT_MAX_RETRIES = 6
+RATE_LIMIT_BASE_DELAY_SECONDS = 4
 
 MATCH_ENTRY_CELL_COUNT = 6
 BALANCING_ENTRY_CELL_COUNT = 4
@@ -64,6 +70,24 @@ RATING_CATEGORY_CONFIG = {
 }
 
 
+def execute_with_backoff(request):
+    for attempt in range(RATE_LIMIT_MAX_RETRIES):
+        try:
+            return request.execute()
+        except HttpError as error:
+            is_rate_limited = error.resp.status == 429
+            is_last_attempt = attempt == RATE_LIMIT_MAX_RETRIES - 1
+            if not is_rate_limited or is_last_attempt:
+                raise
+            delay = RATE_LIMIT_BASE_DELAY_SECONDS * (2 ** attempt) + random.uniform(0, 1)
+            print(
+                "Sheets API rate limit hit, retrying in {0:.1f}s (attempt {1}/{2})".format(
+                    delay, attempt + 1, RATE_LIMIT_MAX_RETRIES
+                )
+            )
+            time.sleep(delay)
+
+
 def read_value(sheet_range):
     creds = Credentials.from_authorized_user_file("token.json", google_auth.SCOPES)
 
@@ -71,10 +95,8 @@ def read_value(sheet_range):
 
     # Call the Sheets API
     sheet = service.spreadsheets()
-    result = (
-        sheet.values()
-        .get(spreadsheetId=MAIN_SPREADSHEET_ID, range=sheet_range)
-        .execute()
+    result = execute_with_backoff(
+        sheet.values().get(spreadsheetId=MAIN_SPREADSHEET_ID, range=sheet_range)
     )
     values = result.get("values", [])
 
@@ -89,7 +111,7 @@ def write_value(sheet_range, value_array):
     body = {"values": value_array}
 
     # Call the Sheets API
-    result = (
+    result = execute_with_backoff(
         service.spreadsheets()
         .values()
         .update(
@@ -98,7 +120,6 @@ def write_value(sheet_range, value_array):
             valueInputOption="RAW",
             body=body,
         )
-        .execute()
     )
 
     print(result)

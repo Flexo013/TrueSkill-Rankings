@@ -1,3 +1,4 @@
+import datetime
 import os.path
 import time
 
@@ -31,7 +32,10 @@ def check_email(credentials):
                 print("{0}, {1}".format(label["name"], label["id"]))
 
         if FETCH_EMAILS:
-            results = service.users().messages().list(userId="me", labelIds=[TARGET_LABEL_ID]).execute()
+            today_start = int(datetime.datetime.combine(datetime.date.today(), datetime.time.min).timestamp())
+            results = service.users().messages().list(
+                userId="me", labelIds=[TARGET_LABEL_ID], q=f"after:{today_start}"
+            ).execute()
             messages = results.get('messages', [])
 
             return len(messages)

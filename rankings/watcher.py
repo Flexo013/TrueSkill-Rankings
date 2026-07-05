@@ -58,7 +58,13 @@ class MailWatcher:
         print(f"[{current_time}] [{game.name}] Found {email_count} labeled emails.")
         if email_count > self._seen_email_counts[game.name]:
             print(f"[{game.name}] Executing processing script!")
-            self._processors[game.name].run()
+            try:
+                self._processors[game.name].run()
+            except Exception as error:
+                # One game's bad data or API failure must not take down the
+                # other games running in this process. Unprocessed rows keep
+                # their state, so the next email triggers a full retry.
+                print(f"[{game.name}] Processing failed: {error}")
             self._seen_email_counts[game.name] = email_count
             print(f"[{game.name}] Done processing!")
 

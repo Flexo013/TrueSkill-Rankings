@@ -28,6 +28,13 @@ The current foosball rankings and leaderboard are managed by this repository's c
 
 # Adding a game
 
-1. Copy the existing spreadsheet as a template and create the matching Google Forms.
-2. Set up a Gmail label + filter so form notification emails for the new game get their own label.
-3. Add a `GameConfig` to `rankings/games.py` with the new spreadsheet ID and label ID. Per-game options include `track_positions` (offense/defense ratings), `track_solo` (separate 1v1 rating), TrueSkill parameters, and score impact tuning.
+One `mail_checker.py` process hosts all games, so people who want their own game (air hockey, table tennis, ...) don't need to run anything themselves — their game just gets registered with the account running this process (the "host account").
+
+1. Copy the existing spreadsheet as a template and create the matching Google Forms. If someone else owns the new spreadsheet, they must share it with the host account with editor access.
+2. Get the form notification emails into the host account's inbox:
+   - If the host account owns the forms, enable "Email notifications for new responses".
+   - If someone else owns them, they enable notifications on their account and set up auto-forwarding of those emails to the host account.
+3. In the host account's Gmail, create a filter that applies a dedicated label to the new game's notification emails. Run `python3 list_labels.py` to find the label's ID.
+4. Add a `GameConfig` to `rankings/games.py` with the new spreadsheet ID and label ID. Per-game options include `track_positions` (offense/defense ratings), `track_solo` (separate 1v1 rating), TrueSkill parameters, and score impact tuning.
+
+A failure while processing one game (bad input data, API errors) is logged and does not affect the other games in the process; the failed game's rows stay unprocessed and are retried when its next email arrives.

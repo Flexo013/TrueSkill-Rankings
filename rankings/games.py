@@ -1,10 +1,16 @@
 """The registry of games this process runs.
 
-To add a game (e.g. air hockey), create its spreadsheet from the same template,
-set up a Gmail label + filter for its form notifications, and add a GameConfig
-here. Options like track_positions/track_solo, TrueSkill settings, and score
-impact tuning can differ per game; see rankings.config for all knobs.
+All games are managed by a single host Google account that owns the
+spreadsheets, forms, and Gmail labels. One process runs every registered
+game, including multiple leagues of the same game for different groups of
+colleagues: game rules (TrueSkill settings, position/solo tracking, score
+impact) live on GameConfig defaults or a shared base config, while each
+league gets its own name, spreadsheet, and Gmail label.
+
+See rankings.config for all available options.
 """
+
+import dataclasses
 
 from rankings.config import GameConfig
 
@@ -14,13 +20,21 @@ FOOSBALL = GameConfig(
     gmail_label_id="Label_6763635978072909105",
 )
 
-# Example of a second game without offense/defense positions:
+# A second league of the same game reuses the rules and overrides identity:
+# FOOSBALL_SALES = dataclasses.replace(
+#     FOOSBALL,
+#     name="foosball-sales",
+#     spreadsheet_id="...",
+#     gmail_label_id="...",
+# )
+
+# A different game type overrides the rules it needs, e.g. no
+# offense/defense positions for air hockey:
 # AIR_HOCKEY = GameConfig(
 #     name="air-hockey",
 #     spreadsheet_id="...",
 #     gmail_label_id="...",
 #     track_positions=False,
-#     score_impact=ScoreImpactSettings(standard_target_score=10),
 # )
 
 GAMES = [FOOSBALL]

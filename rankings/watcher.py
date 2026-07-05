@@ -28,6 +28,9 @@ class MailWatcher:
         credentials = load_credentials(token_path)
         self._gmail = build("gmail", "v1", credentials=credentials)
         self._games = list(games)
+        names = [game.name for game in self._games]
+        if len(set(names)) != len(names):
+            raise ValueError(f"Game names must be unique, got: {names}")
         self._processors = {
             game.name: GameProcessor(game, credentials=credentials)
             for game in self._games

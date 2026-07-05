@@ -219,14 +219,15 @@ class GameProcessor:
             ((p1, p4), (p2, p3)),
         ]
 
-        def draw_chance_offset(pairing):
+        def match_quality(pairing):
             (a1, a2), (b1, b2) = pairing
-            quality = self.env.quality(
+            # TrueSkill quality is the draw probability of the matchup; higher
+            # means more evenly matched, so the fairest split maximizes it.
+            return self.env.quality(
                 [[ratings[a1], ratings[a2]], [ratings[b1], ratings[b2]]]
             )
-            return abs(quality - 0.5)
 
-        (t1a, t1b), (t2a, t2b) = min(pairings, key=draw_chance_offset)
+        (t1a, t1b), (t2a, t2b) = max(pairings, key=match_quality)
         return f"{t1a} {t1b}", f"{t2a} {t2b}"
 
     # --- Leaderboards ---

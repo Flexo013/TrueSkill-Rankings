@@ -18,7 +18,7 @@ Copy the existing game spreadsheet as a template. The processor expects these ta
 
 Create three forms and link their responses to the game spreadsheet so submissions land on the tabs above:
 
-- **Create player** — a single name field; new names are appended to the `Players` tab.
+- **Create player** — a single name field; new names are appended to the `Players` tab. Only register regulars: matches with guests (non-regulars) should **not** be recorded, so guests should not be registered as players either.
 - **Submit match** — four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. For 1v1, 1v2, or 2v1 matches the second player of a team is left empty.
 - **Balance teams** — four player dropdowns; the processor writes the fairest team split back to the sheet.
 
@@ -26,6 +26,7 @@ The player dropdowns in the match and balancing forms are kept in sync with the 
 
 ## Input rules enforced by the processor
 
+- Matches with guests (non-regulars) should **not** be recorded; guests are kept out of the dropdowns by never registering them.
 - Draws are not supported; a match with equal scores is ignored.
 - A match naming the same player twice is ignored.
 - A duplicate name on the `Players` tab aborts processing for that game until fixed (the Apps Script also deletes duplicate registrations on submission).

@@ -8,7 +8,12 @@ any state. Concrete game instances live in ``rankings.games``.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Mapping, Tuple
+from typing import Mapping, Optional, Tuple
+
+# Value in the Players status column that marks a player as retired. Retired
+# players keep their ratings but are dropped from the form dropdowns and the
+# regular leaderboards.
+RETIRED_STATUS = "RETIRED"
 
 
 class RatingCategory(Enum):
@@ -61,11 +66,15 @@ class SheetLayout:
 
     players_range: str = "Players!B3:C"
     players_processed_col: int = 3
+    players_status_col: int = 4
     matches_range: str = "Matches!B2:H"
     matches_processed_col: int = 8
     balancing_range: str = "Balancing!B2:G"
     balancing_team_cols: Tuple[int, int] = (6, 7)
     ratings_first_row: int = 3
+    # Optional overall leaderboard that keeps retired players (marked with a
+    # "(retired)" suffix). Skipped when None.
+    full_leaderboard_range: Optional[str] = None
     categories: Mapping[RatingCategory, CategoryLayout] = field(
         default_factory=lambda: DEFAULT_CATEGORY_LAYOUTS
     )

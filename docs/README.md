@@ -18,3 +18,4 @@ Follow the [game setup checklist](game-setup.md), which walks through:
 ## Operating
 
 - [Running the software](running.md) — launch commands and runtime behavior.
+- [Managing players](managing-players.md) — retiring, unretiring, and renaming players.

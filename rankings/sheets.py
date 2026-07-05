@@ -29,6 +29,15 @@ def parse_range_start(a1_range: str):
     return match["sheet"], col, int(match["row"])
 
 
+def column_letter(col: int) -> str:
+    """Return the A1 column letters for a 1-based column number, e.g. 4 -> "D"."""
+    letters = ""
+    while col:
+        col, rem = divmod(col - 1, 26)
+        letters = chr(ord("A") + rem) + letters
+    return letters
+
+
 def execute_with_backoff(request):
     """Execute a googleapiclient request, retrying rate-limit errors with backoff."""
     for attempt in range(RATE_LIMIT_MAX_RETRIES):

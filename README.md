@@ -15,6 +15,7 @@ Setup and operation are documented in the [docs](docs/README.md):
 - [Account setup](docs/account-setup.md) — one-time: Google Cloud project, OAuth credentials, authentication.
 - [Game setup checklist](docs/game-setup.md) — per game: [forms and spreadsheet](docs/forms.md), [Apps Script](docs/apps-script.md), [mail triggers](docs/mail-triggers.md), and [registering the game](docs/registering-games.md).
 - [Running the software](docs/running.md) — launch commands and runtime behavior.
+- [Managing players](docs/managing-players.md) — retiring, unretiring, and renaming players.
 
 # Quick start
 
@@ -27,9 +28,11 @@ Setup and operation are documented in the [docs](docs/README.md):
 - `mail_checker.py` — entry point; watches Gmail and processes each configured game.
 - `authenticate.py` — one-time OAuth setup; creates `token.json` and verifies Sheets access.
 - `list_labels.py` — prints Gmail label IDs, for configuring a new game.
+- `player_edits.py` — retires, unretires, or renames a player.
 - `rankings/games.py` — the registry of games this process runs. Add a `GameConfig` here to add a game.
 - `rankings/config.py` — configuration dataclasses: game options (1v1/positions/solo tracking), TrueSkill settings, score impact tuning, and spreadsheet layout.
 - `rankings/processor.py` — `GameProcessor`: initializes new players, processes matches, suggests balanced teams, and updates leaderboards for one game.
+- `rankings/player_edits.py` — `PlayerEditor`: applies retiring and renaming edits to a game's spreadsheet.
 - `rankings/rating_math.py` — pure TrueSkill calculations (no Google API dependencies).
 - `rankings/watcher.py` — `MailWatcher`: polls one Gmail label per game and triggers processing on new mail.
 - `rankings/sheets.py` — Google Sheets client with rate-limit backoff.

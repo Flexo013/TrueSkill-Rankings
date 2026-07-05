@@ -6,8 +6,8 @@ from typing import List, Optional, Sequence, Tuple
 import trueskill
 
 from rankings import rating_math
-from rankings.config import GameConfig, RatingCategory
-from rankings.sheets import SheetsClient, parse_range_start
+from rankings.config import GameConfig, RatingCategory, RETIRED_STATUS
+from rankings.sheets import SheetsClient, column_letter, parse_range_start
 
 
 class RatingTable:
@@ -33,6 +33,9 @@ class RatingTable:
 
     def items(self):
         return ((name, self.get_rating(name)) for name in self._names)
+
+    def __len__(self):
+        return len(self._names)
 
 
 class GameProcessor:
@@ -233,6 +236,7 @@ class GameProcessor:
     # --- Leaderboards ---
 
     def update_leaderboards(self) -> None:
+        retired = self.read_retired_players()
         for category in self.config.rating_categories:
             table = self._read_ratings(category)
             rated_players = [
@@ -242,8 +246,44 @@ class GameProcessor:
             ]
             rated_players.sort(key=lambda item: self.env.expose(item[1]), reverse=True)
 
-            values = [[rank + 1, name] for rank, (name, _) in enumerate(rated_players)]
-            self.sheets.write(self.layout.categories[category].leaderboard_range, values)
+            active_players = [name for name, _ in rated_players if name not in retired]
+            self._write_leaderboard(
+                self.layout.categories[category].leaderboard_range,
+                active_players,
+                pad_to=len(table),
+            )
+
+            if category is RatingCategory.OVERALL and self.layout.full_leaderboard_range:
+                all_players = [
+                    f"{name} (retired)" if name in retired else name
+                    for name, _ in rated_players
+                ]
+                self._write_leaderboard(
+                    self.layout.full_leaderboard_range, all_players, pad_to=len(table)
+                )
+
+    def _write_leaderboard(self, sheet_range: str, players: Sequence[str],
+                           pad_to: int) -> None:
+        """Write ranked names, blanking leftover rows from longer earlier boards."""
+        values = [[rank + 1, name] for rank, name in enumerate(players)]
+        values += [["", ""]] * max(0, pad_to - len(values))
+        self.sheets.write(sheet_range, values)
+
+    def read_retired_players(self) -> set:
+        """Return the names on the Players sheet whose status column is RETIRED."""
+        sheet, name_col, start_row = parse_range_start(self.layout.players_range)
+        status_col = self.layout.players_status_col
+        rows = self.sheets.read(
+            f"{sheet}!{column_letter(name_col)}{start_row}:{column_letter(status_col)}"
+        )
+        status_offset = status_col - name_col
+        retired = set()
+        for row in rows:
+            if not row or not str(row[0]).strip():
+                continue
+            if len(row) > status_offset and str(row[status_offset]).strip() == RETIRED_STATUS:
+                retired.add(str(row[0]).strip())
+        return retired
 
     def _is_default_rating(self, rating: trueskill.Rating) -> bool:
         return math.isclose(rating.mu, self.env.mu) and math.isclose(

@@ -8,7 +8,7 @@ Copy the existing game spreadsheet as a template. The processor expects these ta
 
 | Tab | Purpose | Layout |
 |---|---|---|
-| `Players` | Registered player names | Names in column B from row 3; column C marks a player as initialized |
+| `Players` | Registered player names | Names in column B from row 3; column C marks a player as initialized; column D holds the status (`RETIRED` for retired players, see [Managing players](managing-players.md)) |
 | `Matches` | Submitted match results | Columns B–G from row 2: red offense, red defense, blue offense, blue defense, red score, blue score; column H marks a row as processed |
 | `Balancing` | Team-balancing requests | Columns B–E from row 2: four player names; columns F–G receive the suggested teams |
 | `Ratings` | TrueSkill ratings per category | Four column blocks (overall, offense, defense, solo) from row 3, each holding name, mu, sigma |
@@ -29,3 +29,4 @@ The player dropdowns in the match and balancing forms are kept in sync with the 
 - Draws are not supported; a match with equal scores is ignored.
 - A match naming the same player twice is ignored.
 - A duplicate name on the `Players` tab aborts processing for that game until fixed (the Apps Script also deletes duplicate registrations on submission).
+- Retired players keep their ratings but are excluded from the dropdowns and the regular leaderboards — see [Managing players](managing-players.md).

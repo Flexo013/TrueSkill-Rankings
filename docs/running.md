@@ -13,6 +13,7 @@ pip3 install -r requirements.txt
 | `python3 authenticate.py` | One-time OAuth login as the host account; creates `token.json` and verifies spreadsheet access for every registered game. |
 | `python3 mail_checker.py` | The main process: watches Gmail and processes every game in `rankings/games.py`. |
 | `python3 list_labels.py` | Prints all Gmail labels with their IDs, for configuring a new game. |
+| `python3 player_edits.py` | Retires, unretires, or renames a player — see [Managing players](managing-players.md). |
 
 ## Runtime behavior
 

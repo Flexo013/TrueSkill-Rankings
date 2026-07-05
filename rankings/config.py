@@ -23,6 +23,14 @@ class RatingCategory(Enum):
     SOLO = "solo"
 
 
+class MatchFormat(Enum):
+    # 1v1, 1v2, 2v1, or 2v2 matches with a score per team.
+    TEAM = "team"
+    # 2+ players race each other; the match row lists them in finish order
+    # and there are no scores.
+    FREE_FOR_ALL = "free-for-all"
+
+
 @dataclass(frozen=True)
 class CategoryLayout:
     """Where one rating category lives inside the spreadsheet."""
@@ -80,6 +88,14 @@ class SheetLayout:
     )
 
 
+# Template layout for free-for-all games: the Matches tab holds up to eight
+# players in finish order (columns B-I) and the processed mark in column J.
+FFA_SHEET_LAYOUT = SheetLayout(
+    matches_range="Matches!B2:J",
+    matches_processed_col=10,
+)
+
+
 @dataclass(frozen=True)
 class TrueSkillSettings:
     mu: float = 1000.0
@@ -101,19 +117,31 @@ class ScoreImpactSettings:
 
 
 @dataclass(frozen=True)
-class GameConfig:
-    """Everything needed to run one game: identity, options, and sheet layout."""
+class GameType:
+    """The rules of one kind of game, shared by every league of that game.
 
-    name: str
-    spreadsheet_id: str
-    gmail_label_id: str
+    Game-specific tuning like the draw chance and the score an even match
+    is played to lives here, not in the settings defaults, so every game
+    type states its own values. Known game types live in
+    ``rankings.game_types``.
+    """
+
+    match_format: MatchFormat = MatchFormat.TEAM
     trueskill: TrueSkillSettings = TrueSkillSettings()
-    score_impact: ScoreImpactSettings = ScoreImpactSettings()
+    # How the match score scales rating updates; None for formats without
+    # scores (free-for-all).
+    score_impact: Optional[ScoreImpactSettings] = ScoreImpactSettings()
     # Track separate offense/defense ratings for full 2v2 matches.
-    track_positions: bool = True
+    track_positions: bool = False
     # Track a separate "solo" rating for 1v1/1v2/2v1 matches.
-    track_solo: bool = True
-    layout: SheetLayout = SheetLayout()
+    track_solo: bool = False
+    # Free-for-all only: how many player slots the match form offers.
+    ffa_max_players: int = 8
+
+    @property
+    def has_balancing(self) -> bool:
+        """Only team games have a Balancing tab with 2v2 split suggestions."""
+        return self.match_format is MatchFormat.TEAM
 
     @property
     def rating_categories(self) -> Tuple[RatingCategory, ...]:
@@ -123,3 +151,36 @@ class GameConfig:
         if self.track_solo:
             categories.append(RatingCategory.SOLO)
         return tuple(categories)
+
+
+@dataclass(frozen=True)
+class GameConfig:
+    """Everything needed to run one game: identity, rules, and sheet layout."""
+
+    name: str
+    spreadsheet_id: str
+    gmail_label_id: str
+    game_type: GameType = GameType()
+    layout: SheetLayout = SheetLayout()
+
+    # Convenience pass-throughs so callers can stay short.
+
+    @property
+    def trueskill(self) -> TrueSkillSettings:
+        return self.game_type.trueskill
+
+    @property
+    def score_impact(self) -> Optional[ScoreImpactSettings]:
+        return self.game_type.score_impact
+
+    @property
+    def track_positions(self) -> bool:
+        return self.game_type.track_positions
+
+    @property
+    def track_solo(self) -> bool:
+        return self.game_type.track_solo
+
+    @property
+    def rating_categories(self) -> Tuple[RatingCategory, ...]:
+        return self.game_type.rating_categories

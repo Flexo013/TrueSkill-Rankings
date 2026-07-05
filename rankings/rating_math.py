@@ -31,6 +31,20 @@ def rate_flexible_match(
     return [rating for team in new_ratings for rating in team]
 
 
+def rate_free_for_all(
+    env: trueskill.TrueSkill, ratings: List[trueskill.Rating]
+) -> List[trueskill.Rating]:
+    """Rate a free-for-all match, given ratings in finish order (winner first).
+
+    Every player is their own rating group and the finish position is the
+    rank — TrueSkill's native model for N-player free-for-all matches, so no
+    scores are involved. Returns the new ratings in the same order.
+    """
+    groups = [[rating] for rating in ratings]
+    new_ratings = env.rate(groups, ranks=list(range(len(groups))))
+    return [group[0] for group in new_ratings]
+
+
 def scale_rating_update(
     env: trueskill.TrueSkill,
     old_rating: trueskill.Rating,

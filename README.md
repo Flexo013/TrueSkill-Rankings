@@ -30,7 +30,8 @@ Setup and operation are documented in the [docs](docs/README.md):
 - `list_labels.py` — prints Gmail label IDs, for configuring a new game.
 - `player_edits.py` — retires, unretires, or renames a player.
 - `rankings/games.py` — the registry of games this process runs. Add a `GameConfig` here to add a game.
-- `rankings/config.py` — configuration dataclasses: game options (1v1/positions/solo tracking), TrueSkill settings, score impact tuning, and spreadsheet layout.
+- `rankings/game_types.py` — rule presets per kind of game (foosball, air hockey, Trackmania free-for-all).
+- `rankings/config.py` — configuration dataclasses: match formats, game types, TrueSkill settings, score impact tuning, and spreadsheet layout.
 - `rankings/processor.py` — `GameProcessor`: initializes new players, processes matches, suggests balanced teams, and updates leaderboards for one game.
 - `rankings/player_edits.py` — `PlayerEditor`: applies retiring and renaming edits to a game's spreadsheet.
 - `rankings/rating_math.py` — pure TrueSkill calculations (no Google API dependencies).

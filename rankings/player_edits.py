@@ -9,7 +9,7 @@ column to drop retired players from the form dropdowns.
 
 from typing import Optional
 
-from rankings.config import GameConfig, RETIRED_STATUS
+from rankings.config import GameConfig, MatchFormat, RETIRED_STATUS
 from rankings.processor import GameProcessor
 from rankings.sheets import SheetsClient, parse_range_start
 
@@ -52,8 +52,15 @@ class PlayerEditor:
 
         for category in self.config.rating_categories:
             self._rename_in_ratings(category, old_name, new_name)
-        self._rename_in_columns(self.layout.matches_range, 4, old_name, new_name)
-        self._rename_in_columns(self.layout.balancing_range, 4, old_name, new_name)
+        game_type = self.config.game_type
+        match_player_cols = (
+            game_type.ffa_max_players
+            if game_type.match_format is MatchFormat.FREE_FOR_ALL else 4
+        )
+        self._rename_in_columns(self.layout.matches_range, match_player_cols,
+                                old_name, new_name)
+        if game_type.has_balancing:
+            self._rename_in_columns(self.layout.balancing_range, 4, old_name, new_name)
 
         self._processor.update_leaderboards()
 

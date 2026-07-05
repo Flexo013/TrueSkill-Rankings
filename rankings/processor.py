@@ -6,7 +6,7 @@ from typing import List, Optional, Sequence, Tuple
 import trueskill
 
 from rankings import rating_math
-from rankings.config import GameConfig, RatingCategory, RETIRED_STATUS
+from rankings.config import GameConfig, MatchFormat, RatingCategory, RETIRED_STATUS
 from rankings.sheets import SheetsClient, column_letter, parse_range_start
 
 
@@ -58,7 +58,8 @@ class GameProcessor:
     def run(self) -> None:
         if not self.init_players():
             return
-        self.suggest_balanced_teams()
+        if self.config.game_type.has_balancing:
+            self.suggest_balanced_teams()
         self.process_matches()
         self.update_leaderboards()
 
@@ -109,6 +110,32 @@ class GameProcessor:
             self.sheets.write(processed_cell, [["TRUE"]])
 
     def _process_match(self, match_row: list) -> None:
+        if self.config.game_type.match_format is MatchFormat.FREE_FOR_ALL:
+            self._process_ffa_match(match_row)
+        else:
+            self._process_team_match(match_row)
+
+    def _process_ffa_match(self, match_row: list) -> None:
+        """Process a free-for-all match row: player names in finish order.
+
+        Empty slots mean the race had fewer players; TrueSkill rates the
+        whole field from the finish order, so there are no scores.
+        """
+        names = [str(cell).strip() for cell in match_row if str(cell).strip()]
+        if len(names) < 2:
+            # A race against nobody carries no information.
+            return
+        if len(set(names)) != len(names):
+            # Bogus input where a player occurs multiple times.
+            return
+
+        table = self._read_ratings(RatingCategory.OVERALL)
+        old_ratings = [table.get_rating(name) for name in names]
+        new_ratings = rating_math.rate_free_for_all(self.env, old_ratings)
+        for name, rating in zip(names, new_ratings):
+            self._write_rating(RatingCategory.OVERALL, table.row_number(name), rating)
+
+    def _process_team_match(self, match_row: list) -> None:
         red_off, red_def, blue_off, blue_def, score_red, score_blue = match_row
         score_red = int(score_red)
         score_blue = int(score_blue)

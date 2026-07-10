@@ -1,6 +1,6 @@
 # Registering games
 
-Games are registered in code: `rankings/games.py` holds one `GameConfig` per game, and the process runs everything in its `GAMES` list. Game names must be unique — the watcher refuses to start otherwise.
+Games are registered in code: `rankings/games.py` holds one `GameConfig` per game, and the process runs everything in its `GAMES` list. Game names must be unique; the watcher refuses to start otherwise.
 
 The examples below only set the options they need; see [Full example](#full-example) for a `GameConfig` spelling out every available option.
 
@@ -40,6 +40,10 @@ All options live in `rankings/config.py`:
 |---|---|---|
 | `track_positions` | `True` | Keep separate offense/defense ratings for full 2v2 matches |
 | `track_solo` | `True` | Keep a separate rating for 1v1/1v2/2v1 matches |
+| `match_format` | `MatchFormat.TEAM` | How matches are entered and rated; `FFA` is scaffolding, see [Future work](#future-work) |
+| `allow_draws` | `False` | Whether matches can end in equal scores; `True` is scaffolding, see [Future work](#future-work) |
+| `max_players_per_match` | `4` | Player slots on the match form; values other than 4 are scaffolding, see [Future work](#future-work) |
+| `enable_balancing` | `True` | Whether the game has a balancing form and sheet |
 | `trueskill` | mu 1000, sigma 333, beta 166, tau 3.3333, draw probability 0.001 | `TrueSkillSettings` for the game's rating environment |
 | `score_impact` | target score 10, factor caps 0.75–1.25 | `ScoreImpactSettings`: how score margin, match quality, and match length scale rating updates |
 | `layout` | template layout | `SheetLayout`: A1 ranges of all tabs, for spreadsheets that deviate from the template |
@@ -55,6 +59,10 @@ GameConfig(
     gmail_label_id="Label_...",
     track_positions=True,
     track_solo=True,
+    match_format=MatchFormat.TEAM,
+    allow_draws=False,
+    max_players_per_match=4,
+    enable_balancing=True,
     trueskill=TrueSkillSettings(
         mu=1000.0,
         sigma=333.0,
@@ -82,8 +90,8 @@ GameConfig(
 )
 ```
 
-After editing `rankings/games.py`, restart the process to pick up the change — see [Running the software](running.md).
+After editing `rankings/games.py`, restart the process to pick up the change; see [Running the software](running.md).
 
 ## Future work
 
-More rules should move onto `GameConfig` so game types can differ where they currently cannot: max players per match, whether draws are allowed, whether the balancing form exists, and eventually the match format itself (e.g. FFA) — see the future-work notes in [Forms and spreadsheet](forms.md) and [Apps Script](apps-script.md).
+`match_format=MatchFormat.FFA`, `allow_draws=True`, and `max_players_per_match` values other than 4 are scaffolding: the options exist on `GameConfig` but raise `NotImplementedError` at registration time until the processor supports them. See the future-work notes in [Forms and spreadsheet](forms.md) and [Apps Script](apps-script.md).

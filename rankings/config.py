@@ -18,6 +18,14 @@ class RatingCategory(Enum):
     SOLO = "solo"
 
 
+class MatchFormat(Enum):
+    # Two teams of one or two players, each with a score.
+    TEAM = "team"
+    # Free-for-all: players entered in finish order, scores optional.
+    # Scaffolding only; selecting it raises NotImplementedError.
+    FFA = "ffa"
+
+
 @dataclass(frozen=True)
 class CategoryLayout:
     """Where one rating category lives inside the spreadsheet."""
@@ -104,7 +112,37 @@ class GameConfig:
     track_positions: bool = True
     # Track a separate "solo" rating for 1v1/1v2/2v1 matches.
     track_solo: bool = True
+    # How matches are entered and rated. Scaffolding: only TEAM is implemented.
+    match_format: MatchFormat = MatchFormat.TEAM
+    # Allow matches with equal scores, for games played on time.
+    # Scaffolding: rating a draw is not implemented, equal scores are skipped.
+    allow_draws: bool = False
+    # Number of player slots on the match form. Scaffolding: the processor
+    # only supports 4 (two teams of one or two players). Must match the
+    # MAX_PLAYERS_PER_MATCH constant of the game's Apps Script.
+    max_players_per_match: int = 4
+    # Whether the game has a balancing form and sheet. Disable for game
+    # types where team balancing makes no sense (e.g. FFA).
+    enable_balancing: bool = True
     layout: SheetLayout = SheetLayout()
+
+    def __post_init__(self):
+        # Fail at registration time for scaffolded options that the
+        # processor cannot honor yet, rather than misprocessing matches.
+        if self.match_format is not MatchFormat.TEAM:
+            raise NotImplementedError(
+                f"{self.name}: match_format={self.match_format.value!r}"
+                " is not implemented yet"
+            )
+        if self.allow_draws:
+            raise NotImplementedError(
+                f"{self.name}: allow_draws is not implemented yet"
+            )
+        if self.max_players_per_match != 4:
+            raise NotImplementedError(
+                f"{self.name}: max_players_per_match="
+                f"{self.max_players_per_match} is not implemented yet"
+            )
 
     @property
     def rating_categories(self) -> Tuple[RatingCategory, ...]:

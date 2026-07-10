@@ -14,17 +14,17 @@ Copy the existing game spreadsheet as a template. The processor expects these ta
 | `Ratings` | TrueSkill ratings per category | Four column blocks (overall, offense, defense, solo) from row 3, each holding name, mu, sigma |
 | `Leaderboard` | Ranked output per category | Written by the processor; rank and name per category block |
 
-This layout reflects the only match format supported today: two teams of one or two players, each with a score. It should eventually depend on the game type — for example, an FFA format would take player names in finish order, with scores optional. See [Future work](#future-work).
+This layout reflects the only match format supported today: two teams of one or two players, each with a score. It should eventually depend on the game type; an FFA format, for example, would take player names in finish order, with scores optional. See [Future work](#future-work).
 
 ## Forms
 
-Create three forms and link their responses to the game spreadsheet so submissions land on the tabs above:
+Create the forms and link their responses to the game spreadsheet so submissions land on the tabs above:
 
-- **Create player** — a single name field; new names are appended to the `Players` tab.
-- **Submit match** — four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. For 1v1, 1v2, or 2v1 matches the second player of a team is left empty.
-- **Balance teams** — four player dropdowns; the processor writes the fairest team split back to the sheet.
+- **Create player**: a single name field; new names are appended to the `Players` tab.
+- **Submit match**: four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. For 1v1, 1v2, or 2v1 matches the second player of a team is left empty.
+- **Balance teams** (optional): four player dropdowns; the processor writes the fairest team split back to the sheet. Skip this form for game types where balancing makes no sense, and set `enable_balancing=False` on the game's `GameConfig`.
 
-The player dropdowns in the match and balancing forms are kept in sync with the `Players` tab by an Apps Script — see [Apps Script](apps-script.md).
+The player dropdowns in the match and balancing forms are kept in sync with the `Players` tab by an Apps Script; see [Apps Script](apps-script.md).
 
 ## Input rules enforced by the processor
 
@@ -34,5 +34,8 @@ The player dropdowns in the match and balancing forms are kept in sync with the 
 
 ## Future work
 
-- Draw support should become configurable per game: a game played on time can legitimately end in a draw.
-- The match format (and with it the `Matches` layout and the match form) should depend on the game type, e.g. an FFA format with players entered in finish order and optional scores.
+`GameConfig` already scaffolds the options below, but selecting them raises `NotImplementedError` until the processor supports them:
+
+- `allow_draws`: draw support should become configurable per game, since a game played on time can legitimately end in a draw.
+- `match_format=MatchFormat.FFA`: an FFA format with players entered in finish order and optional scores, which also changes the `Matches` layout and the match form.
+- `max_players_per_match`: values other than 4 require the processor to handle a variable number of player columns.

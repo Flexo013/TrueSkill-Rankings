@@ -6,7 +6,7 @@ One-time setup of the host Google account. This account owns every game's spread
 
 1. Create a project in the [Google Cloud console](https://console.cloud.google.com/) under the host account.
 2. Enable the **Google Sheets API** and the **Gmail API** for the project.
-3. Configure the OAuth consent screen and **publish the app to production**. In testing mode the refresh token expires after 7 days, forcing a re-authentication every week. Publishing does not require Google verification as long as only the host account logs in — the unverified-app warning during login can be clicked through.
+3. Configure the OAuth consent screen and **publish the app to production**. In testing mode the refresh token expires after 7 days, forcing a re-authentication every week. Publishing does not require Google verification as long as only the host account logs in; the unverified-app warning during login can be clicked through.
 4. Create an OAuth client ID of type **Desktop app** and download the client secret JSON as `credentials.json` in the repository root.
 
 `credentials.json` is gitignored and must never be committed.
@@ -19,8 +19,8 @@ python3 authenticate.py
 
 This opens a browser to log in as the host account and asks consent for the two scopes the software uses (defined in `rankings/auth.py`):
 
-- `spreadsheets` — read and write the game sheets.
-- `gmail.readonly` — count notification emails to detect new submissions.
+- `spreadsheets`: read and write the game sheets.
+- `gmail.readonly`: count notification emails to detect new submissions.
 
 The resulting token is stored as `token.json` (also gitignored). The script then verifies spreadsheet access for every game registered in `rankings/games.py`.
 

@@ -6,13 +6,15 @@ Google Apps Script keeps the player dropdowns in the match and balancing forms i
 
 1. Open the new game's spreadsheet and go to **Extensions → Apps Script**.
 2. Paste the contents of `apps_script/update_player_dropdowns.gs`.
-3. Replace the two form IDs at the top with the new game's **match form** and **balancing form** IDs (the long ID in each form's edit URL).
+3. Set the per-game constants at the top of the script:
+   - `MATCH_FORM_ID`: the new game's match form ID (the long ID in the form's edit URL).
+   - `BALANCE_FORM_ID`: the balancing form ID, or empty (`''`) for games without a balancing form.
+   - `MAX_PLAYERS_PER_MATCH`: the number of player dropdowns, matching the `max_players_per_match` of the game's `GameConfig`.
 4. Add an installable trigger: **Triggers → Add trigger**, function `updateDropdown`, event source *From spreadsheet*, event type *On form submit*.
-5. Submit a test player through the create-player form and check that both forms' dropdowns update.
+5. Submit a test player through the create-player form and check that the forms' dropdowns update.
 
-The script assumes the first four `LIST` items of each form are the player dropdowns, so keep any additional dropdown questions after them.
+The script assumes the first `MAX_PLAYERS_PER_MATCH` dropdown (`LIST`) items of each form are the player dropdowns, so keep any additional dropdown questions after them.
 
 ## Future work
 
-- The number of player dropdowns is hardcoded to four; it should become configurable per game type as a max-players-per-match setting.
-- The balancing form should become optional — in always-FFA games a team-balancing form makes no sense.
+The script constants duplicate settings that live on the game's `GameConfig` (`max_players_per_match`, `enable_balancing`). Eventually the script should be generated or driven from the config so a game is only configured once.

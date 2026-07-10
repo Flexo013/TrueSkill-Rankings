@@ -55,7 +55,8 @@ class GameProcessor:
     def run(self) -> None:
         if not self.init_players():
             return
-        self.suggest_balanced_teams()
+        if self.config.enable_balancing:
+            self.suggest_balanced_teams()
         self.process_matches()
         self.update_leaderboards()
 
@@ -110,7 +111,8 @@ class GameProcessor:
         score_red = int(score_red)
         score_blue = int(score_blue)
         if score_red == score_blue:
-            # Draws are not supported.
+            # Draws are not rated; GameConfig.allow_draws is scaffolding
+            # for rating them (equal ranks) in the future.
             return
 
         if score_red > score_blue:

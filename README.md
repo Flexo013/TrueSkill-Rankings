@@ -12,26 +12,26 @@ The current foosball rankings and leaderboard are managed by this repository's c
 
 Setup and operation are documented in the [docs](docs/README.md):
 
-- [Account setup](docs/account-setup.md) — one-time: Google Cloud project, OAuth credentials, authentication.
-- [Game setup checklist](docs/game-setup.md) — per game: [forms and spreadsheet](docs/forms.md), [Apps Script](docs/apps-script.md), [mail triggers](docs/mail-triggers.md), and [registering the game](docs/registering-games.md).
-- [Running the software](docs/running.md) — launch commands and runtime behavior.
+- [Account setup](docs/account-setup.md): one-time setup of the Google Cloud project, OAuth credentials, and authentication.
+- [Game setup checklist](docs/game-setup.md): per-game setup of [forms and spreadsheet](docs/forms.md), [Apps Script](docs/apps-script.md), [mail triggers](docs/mail-triggers.md), and [registering the game](docs/registering-games.md).
+- [Running the software](docs/running.md): launch commands and runtime behavior.
 
 # Quick start
 
 1. `pip3 install -r requirements.txt`
-2. `python3 authenticate.py` — authenticate as the host account (creates `token.json`; delete any old token first).
-3. `python3 mail_checker.py` — run the watcher.
+2. `python3 authenticate.py`: authenticate as the host account (creates `token.json`; delete any old token first).
+3. `python3 mail_checker.py`: run the watcher.
 
 # Code layout
 
-- `mail_checker.py` — entry point; watches Gmail and processes each configured game.
-- `authenticate.py` — one-time OAuth setup; creates `token.json` and verifies Sheets access.
-- `list_labels.py` — prints Gmail label IDs, for configuring a new game.
-- `rankings/games.py` — the registry of games this process runs. Add a `GameConfig` here to add a game.
-- `rankings/config.py` — configuration dataclasses: game options (1v1/positions/solo tracking), TrueSkill settings, score impact tuning, and spreadsheet layout.
-- `rankings/processor.py` — `GameProcessor`: initializes new players, processes matches, suggests balanced teams, and updates leaderboards for one game.
-- `rankings/rating_math.py` — pure TrueSkill calculations (no Google API dependencies).
-- `rankings/watcher.py` — `MailWatcher`: polls one Gmail label per game and triggers processing on new mail.
-- `rankings/sheets.py` — Google Sheets client with rate-limit backoff.
-- `rankings/auth.py` — shared OAuth credential handling.
-- `apps_script/` — reference copy of the Apps Script bound to each game spreadsheet.
+- `mail_checker.py`: entry point; watches Gmail and processes each configured game.
+- `authenticate.py`: one-time OAuth setup; creates `token.json` and verifies Sheets access.
+- `list_labels.py`: prints Gmail label IDs, for configuring a new game.
+- `rankings/games.py`: the registry of games this process runs. Add a `GameConfig` here to add a game.
+- `rankings/config.py`: configuration dataclasses for game options (1v1/positions/solo tracking), TrueSkill settings, score impact tuning, and spreadsheet layout.
+- `rankings/processor.py`: `GameProcessor`, which initializes new players, processes matches, suggests balanced teams, and updates leaderboards for one game.
+- `rankings/rating_math.py`: pure TrueSkill calculations (no Google API dependencies).
+- `rankings/watcher.py`: `MailWatcher`, which polls one Gmail label per game and triggers processing on new mail.
+- `rankings/sheets.py`: Google Sheets client with rate-limit backoff.
+- `rankings/auth.py`: shared OAuth credential handling.
+- `apps_script/`: reference copy of the Apps Script bound to each game spreadsheet.

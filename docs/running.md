@@ -17,10 +17,10 @@ pip3 install -r requirements.txt
 ## Runtime behavior
 
 - The process polls each game's Gmail label every 30 seconds during working hours: **weekdays 08:00–22:00** (configured in `rankings/watcher.py`).
-- Outside working hours the process exits, so it needs to be started each working day — for example via cron on the host system:
+- Outside working hours the process exits, so it needs to be started each working day via cron on the host system. The entry currently in use (`-u` keeps the log unbuffered):
 
   ```
-  0 8 * * 1-5  cd /path/to/repo && python3 mail_checker.py >> logs/mail-checker-$(date +\%m-\%d).log 2>&1
+  55 8 * * 1-5  cd /home/floris.huizinga/Repos/Foosball && /usr/bin/python3 -u mail_checker.py >> /home/floris.huizinga/Repos/Foosball/logs/mail-checker-$(date +\%m-\%d).log 2>&1
   ```
 
 - A processing failure in one game (bad input, API errors) is logged and does not affect other games; the failed game's unprocessed rows are retried when its next email arrives.

@@ -6,7 +6,7 @@ One-time setup of the host Google account. This account owns every game's spread
 
 1. Create a project in the [Google Cloud console](https://console.cloud.google.com/) under the host account.
 2. Enable the **Google Sheets API** and the **Gmail API** for the project.
-3. Configure the OAuth consent screen. Since only the host account uses the app, testing mode with the host account added as a test user is sufficient.
+3. Configure the OAuth consent screen and **publish the app to production**. In testing mode the refresh token expires after 7 days, forcing a re-authentication every week. Publishing does not require Google verification as long as only the host account logs in — the unverified-app warning during login can be clicked through.
 4. Create an OAuth client ID of type **Desktop app** and download the client secret JSON as `credentials.json` in the repository root.
 
 `credentials.json` is gitignored and must never be committed.

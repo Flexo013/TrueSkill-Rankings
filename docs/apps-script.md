@@ -1,14 +1,6 @@
 # Apps Script
 
-Google Apps Script keeps the player dropdowns in the match and balancing forms in sync with the `Players` tab. The script lives in this repository at `apps_script/update_player_dropdowns.gs` for reference; the live copy runs bound to each game's spreadsheet.
-
-## What it does
-
-On every new player registration, `updateDropdown`:
-
-1. Reads all player names from `Players!B2:B`.
-2. Trims the latest entry and deletes the row again if the name already exists (duplicate registration).
-3. Sorts the names and sets them as the choices of the first four dropdown (`LIST`) items of both the match form and the balancing form.
+Google Apps Script keeps the player dropdowns in the match and balancing forms in sync with the `Players` tab: it is triggered by a submission on the create-player form and updates the dropdowns of the other forms. The script lives in this repository at `apps_script/update_player_dropdowns.gs` for reference; the live copy runs bound to each game's spreadsheet, where the code is leading.
 
 ## Installing it for a new game
 
@@ -19,3 +11,8 @@ On every new player registration, `updateDropdown`:
 5. Submit a test player through the create-player form and check that both forms' dropdowns update.
 
 The script assumes the first four `LIST` items of each form are the player dropdowns, so keep any additional dropdown questions after them.
+
+## Future work
+
+- The number of player dropdowns is hardcoded to four; it should become configurable per game type as a max-players-per-match setting.
+- The balancing form should become optional — in always-FFA games a team-balancing form makes no sense.

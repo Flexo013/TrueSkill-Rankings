@@ -2,6 +2,8 @@
 
 Games are registered in code: `rankings/games.py` holds one `GameConfig` per game, and the process runs everything in its `GAMES` list. Game names must be unique — the watcher refuses to start otherwise.
 
+The examples below only set the options they need; see [Full example](#full-example) for a `GameConfig` spelling out every available option.
+
 ## A new game
 
 ```python
@@ -42,4 +44,46 @@ All options live in `rankings/config.py`:
 | `score_impact` | target score 10, factor caps 0.75–1.25 | `ScoreImpactSettings`: how score margin, match quality, and match length scale rating updates |
 | `layout` | template layout | `SheetLayout`: A1 ranges of all tabs, for spreadsheets that deviate from the template |
 
+## Full example
+
+A `GameConfig` with every option written out, set to its default value:
+
+```python
+GameConfig(
+    name="example",
+    spreadsheet_id="...",
+    gmail_label_id="Label_...",
+    track_positions=True,
+    track_solo=True,
+    trueskill=TrueSkillSettings(
+        mu=1000.0,
+        sigma=333.0,
+        beta=166.0,
+        tau=3.3333,
+        draw_probability=0.001,
+    ),
+    score_impact=ScoreImpactSettings(
+        min_score_factor=0.75,
+        max_score_factor=1.25,
+        quality_min_factor=0.85,
+        quality_factor_span=0.3,
+        standard_target_score=10,
+    ),
+    layout=SheetLayout(
+        players_range="Players!B3:C",
+        players_processed_col=3,
+        matches_range="Matches!B2:H",
+        matches_processed_col=8,
+        balancing_range="Balancing!B2:G",
+        balancing_team_cols=(6, 7),
+        ratings_first_row=3,
+        categories=DEFAULT_CATEGORY_LAYOUTS,  # per-category ranges, see config.py
+    ),
+)
+```
+
 After editing `rankings/games.py`, restart the process to pick up the change — see [Running the software](running.md).
+
+## Future work
+
+More rules should move onto `GameConfig` so game types can differ where they currently cannot: max players per match, whether draws are allowed, whether the balancing form exists, and eventually the match format itself (e.g. FFA) — see the future-work notes in [Forms and spreadsheet](forms.md) and [Apps Script](apps-script.md).

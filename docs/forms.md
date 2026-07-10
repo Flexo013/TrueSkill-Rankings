@@ -14,6 +14,8 @@ Copy the existing game spreadsheet as a template. The processor expects these ta
 | `Ratings` | TrueSkill ratings per category | Four column blocks (overall, offense, defense, solo) from row 3, each holding name, mu, sigma |
 | `Leaderboard` | Ranked output per category | Written by the processor; rank and name per category block |
 
+This layout reflects the only match format supported today: two teams of one or two players, each with a score. It should eventually depend on the game type — for example, an FFA format would take player names in finish order, with scores optional. See [Future work](#future-work).
+
 ## Forms
 
 Create three forms and link their responses to the game spreadsheet so submissions land on the tabs above:
@@ -29,3 +31,8 @@ The player dropdowns in the match and balancing forms are kept in sync with the 
 - Draws are not supported; a match with equal scores is ignored.
 - A match naming the same player twice is ignored.
 - A duplicate name on the `Players` tab aborts processing for that game until fixed (the Apps Script also deletes duplicate registrations on submission).
+
+## Future work
+
+- Draw support should become configurable per game: a game played on time can legitimately end in a draw.
+- The match format (and with it the `Matches` layout and the match form) should depend on the game type, e.g. an FFA format with players entered in finish order and optional scores.

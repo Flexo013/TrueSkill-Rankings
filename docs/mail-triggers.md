@@ -19,5 +19,4 @@ The processor does not poll the spreadsheets directly. Instead, every form submi
 
 - The watcher polls every 30 seconds during working hours (weekdays 08:00–22:00, see `rankings/watcher.py`).
 - Only emails from the current day are counted, so old mail does not need to be cleaned up.
-- On startup the count for each game starts at zero, so any of today's existing emails trigger one initial processing run per game.
 - Each label must be specific to one game: a shared label would trigger processing of the wrong game (harmless, as processing is idempotent, but noisy).

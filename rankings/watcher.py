@@ -38,11 +38,24 @@ class MailWatcher:
         self._seen_email_counts = {game.name: 0 for game in self._games}
 
     def run(self) -> None:
+        self._process_all_games()
         while self._within_working_hours():
             for game in self._games:
                 self._poll_game(game)
             time.sleep(POLL_INTERVAL_SECONDS)
         print("Outside of working hours, terminating...")
+
+    def _process_all_games(self) -> None:
+        # The email-count trigger only looks at today's mail, so a game left
+        # unprocessed from a prior run (crash, missed cron, downtime) would
+        # otherwise sit stale until unrelated new mail happens to trigger it.
+        # Running every game once on startup catches those up immediately.
+        for game in self._games:
+            print(f"[{game.name}] Running startup catch-up processing!")
+            try:
+                self._processors[game.name].run()
+            except Exception as error:
+                print(f"[{game.name}] Startup processing failed: {error}")
 
     def _within_working_hours(self) -> bool:
         return (

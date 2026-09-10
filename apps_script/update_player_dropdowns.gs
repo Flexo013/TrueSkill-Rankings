@@ -1,7 +1,5 @@
 // Per-game configuration.
 var MATCH_FORM_ID = '1HGbpZ_jpBOSMqCiLlWPI8RaBeKdJtGFcvY-5RUF8jl8';
-// Leave empty ('') for games without a balancing form.
-var BALANCE_FORM_ID = '1gvLM-vfbb57cloiaXsQ_8u6-dBNj5yih5PHmfD5tmK0';
 // Number of player dropdowns at the start of each form. Must match the
 // max_players_per_match of the game's GameConfig.
 var MAX_PLAYERS_PER_MATCH = 4;
@@ -30,15 +28,10 @@ function updateDropdown() {
 
   items.sort();
 
-  // Update the dropdown options of every configured form
-  var forms = [FormApp.openById(MATCH_FORM_ID)];
-  if (BALANCE_FORM_ID) {
-    forms.push(FormApp.openById(BALANCE_FORM_ID));
+  // Update the dropdown options of the match form
+  var form = FormApp.openById(MATCH_FORM_ID);
+  var formItems = form.getItems(FormApp.ItemType.LIST);
+  for (var i = 0; i < MAX_PLAYERS_PER_MATCH; i++) {
+    formItems[i].asListItem().setChoiceValues(items);
   }
-  forms.forEach(function(form) {
-    var formItems = form.getItems(FormApp.ItemType.LIST);
-    for (var i = 0; i < MAX_PLAYERS_PER_MATCH; i++) {
-      formItems[i].asListItem().setChoiceValues(items);
-    }
-  });
 }

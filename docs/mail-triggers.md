@@ -5,7 +5,9 @@ The processor does not poll the spreadsheets directly. Instead, every form submi
 ## Setup per game
 
 1. On each of the game's forms, open the **Responses** tab and enable **Get email notifications for new responses** (while logged in as the host account, which owns the forms).
-2. In the host account's Gmail, create a label for the game (e.g. `Games/Airhockey`).
+    - Submit a match to confirm this works.
+2. In the host account's Gmail, create a label for the game (e.g. `Foosball`).
+    - Using the mail you received from the form create an automatic filter that applies the label to new emails with that matching title.
 3. Create a filter that applies this label to the game's notification emails. Filtering on subject works well, since notification subjects contain the form title; make sure each game's form titles are distinguishable.
 4. Find the label's ID:
 

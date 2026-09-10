@@ -17,7 +17,7 @@ This layout reflects the only match format supported today: two teams of one or 
 
 ## Forms
 
-Create the forms and link their responses to the game spreadsheet so submissions land on the tabs above:
+Create the forms and link their responses to the game spreadsheet tabs so submissions land on the tabs above:
 
 - **Create player** ([template](https://forms.gle/6jN3NTBp1Aqpatzv7)): a single name field; new names are appended to the `Players` tab.
 - **Submit match** ([template](https://forms.gle/hmQ687XhT3njrxy79)): four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. The second player of a team should be optional while all other fields are required.

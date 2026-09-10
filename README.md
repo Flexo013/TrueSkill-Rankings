@@ -10,11 +10,7 @@ The current foosball rankings and leaderboard are managed by this repository's c
 
 # Documentation
 
-Setup and operation are documented in the [docs](docs/README.md):
-
-- [Account setup](docs/account-setup.md): one-time setup of the Google Cloud project, OAuth credentials, and authentication.
-- [Game setup checklist](docs/game-setup.md): per-game setup of [forms and spreadsheet](docs/forms.md), [Apps Script](docs/apps-script.md), [mail triggers](docs/mail-triggers.md), and [registering the game](docs/registering-games.md).
-- [Running the software](docs/running.md): launch commands and runtime behavior.
+Setup and operation are documented in [docs/index.md](docs/index.md).
 
 # Quick start
 

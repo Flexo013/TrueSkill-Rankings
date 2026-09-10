@@ -4,13 +4,12 @@ Each game has one spreadsheet and its own set of Google Forms, all owned by the 
 
 ## Spreadsheet
 
-Copy the existing game spreadsheet as a template. The processor expects these tabs (exact ranges are configured in `rankings/config.py` under `SheetLayout` and can be overridden per game):
+Copy the [game spreadsheet template](https://docs.google.com/spreadsheets/d/1dTYNrOF8uSul85hZzxYDwFGW5WCF4oBNRvM92DUFftA/edit?usp=sharing). The processor expects these tabs (exact ranges are configured in `rankings/config.py` under `SheetLayout` and can be overridden per game):
 
 | Tab | Purpose | Layout |
 |---|---|---|
 | `Players` | Registered player names | Names in column B from row 3; column C marks a player as initialized |
 | `Matches` | Submitted match results | Columns B–G from row 2: red offense, red defense, blue offense, blue defense, red score, blue score; column H marks a row as processed |
-| `Balancing` | Team-balancing requests | Columns B–E from row 2: four player names; columns F–G receive the suggested teams |
 | `Ratings` | TrueSkill ratings per category | Four column blocks (overall, offense, defense, solo) from row 3, each holding name, mu, sigma |
 | `Leaderboard` | Ranked output per category | Written by the processor; rank and name per category block |
 
@@ -20,11 +19,10 @@ This layout reflects the only match format supported today: two teams of one or 
 
 Create the forms and link their responses to the game spreadsheet so submissions land on the tabs above:
 
-- **Create player**: a single name field; new names are appended to the `Players` tab.
-- **Submit match**: four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. For 1v1, 1v2, or 2v1 matches the second player of a team is left empty.
-- **Balance teams** (optional): four player dropdowns; the processor writes the fairest team split back to the sheet. Skip this form for game types where balancing makes no sense, and set `enable_balancing=False` on the game's `GameConfig`.
+- **Create player** ([template](https://forms.gle/6jN3NTBp1Aqpatzv7)): a single name field; new names are appended to the `Players` tab.
+- **Submit match** ([template](https://forms.gle/hmQ687XhT3njrxy79)): four player dropdowns (red offense, red defense, blue offense, blue defense) and the two team scores. The second player of a team should be optional while all other fields are required.
 
-The player dropdowns in the match and balancing forms are kept in sync with the `Players` tab by an Apps Script; see [Apps Script](apps-script.md).
+The player dropdowns in the match form are kept in sync with the `Players` tab by an Apps Script; see [Apps Script](apps-script.md).
 
 ## Input rules enforced by the processor
 

@@ -18,11 +18,18 @@ One-time setup of the host Google account. This account owns every game's spread
     2. Audience: `External`
     3. Contact info: Same email as above
     4. Finish
----
-3. Configure the OAuth consent screen and **publish the app to production**. In testing mode the refresh token expires after 7 days, forcing a re-authentication every week. Publishing does not require Google verification as long as only the host account logs in; the unverified-app warning during login can be clicked through.
-4. Create an OAuth client ID of type **Desktop app** and download the client secret JSON as `credentials.json` in the repository root.
-
-`credentials.json` is gitignored and must never be committed.
+6. Navigate to 'Data access' and add the following scopes:
+    1. `auth/spreedsheets` to read and edit them.
+    2. `auth/gmail.readonly` to get notified of new matches.
+    3.  Save these changes.
+7. Navigate to 'Branding' and set URLs and a domain.
+    1. Add any image as logo.
+    2. Home page: `https://github.com/Flexo013/TrueSkill-Rankings`
+    3. Privacy policy and ToS: `https://github.com/Flexo013/TrueSkill-Rankings/blob/main/README.md`
+    4. Authorized domain: `github.com`
+    5. Save these changes.
+8. Navigate to 'Audience' and publish the app.
+    - Note that the verification status is not blocking for using the app.
 
 ## 2. Authenticate
 
@@ -39,5 +46,4 @@ The resulting token is stored as `token.json` (also gitignored). The script then
 
 ## Re-authenticating
 
-- Tokens refresh automatically; re-running `authenticate.py` is only needed when the token is revoked or invalid.
 - If the scopes in `rankings/auth.py` ever change, delete `token.json` and run `authenticate.py` again.

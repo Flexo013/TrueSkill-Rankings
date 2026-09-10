@@ -9,9 +9,9 @@ The processor does not poll the spreadsheets directly. Instead, every form submi
 3. Create a filter that applies this label to the game's notification emails. Filtering on subject works well, since notification subjects contain the form title; make sure each game's form titles are distinguishable.
 4. Find the label's ID:
 
-   ```bash
-   python3 list_labels.py
-   ```
+    ```bash
+    python3 list_labels.py
+    ```
 
 5. Use that label ID as the `gmail_label_id` of the game's `GameConfig`; see [Registering games](registering-games.md).
 
